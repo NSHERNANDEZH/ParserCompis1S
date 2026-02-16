@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
 
+import java.io.IOException;
 import java.util.*;
 
 public class Main {
@@ -16,14 +17,17 @@ public class Main {
                 "Y=BN0010\n" +
                 "Z=OC0011\n" +
                 "X + Y * Z";
-
+        String fileName = "entrada.txt"; // agregado para el txt
         System.out.println("COMPILADOR - LABORATORIO 1");
         System.out.println("==================================================\n");
 
         // Tokenizacion
         System.out.println("=== TOKENIZACION ===\n");
 
-        CharStream cs = CharStreams.fromString(input);
+// 3. AGREGADO: Bloque try para manejar errores de lectura de archivo**
+        try {
+            // 4. CAMBIO: CharStreams.fromString -> CharStreams.fromFileName**
+            CharStream cs = CharStreams.fromFileName(fileName); // fin agregado
         ExprLexer lexer = new ExprLexer(cs);
 
         // Recolectar todos los tokens
@@ -50,6 +54,11 @@ public class Main {
         // evaluar con shunting yard
         System.out.println("\n==================================================");
         analyzeAndEvaluate(allTokens);
+
+        } catch (IOException e) { // 5. MANEJO DE ERROR DE ARCHIVO Agregado
+            System.err.println("Error: No se encontró el archivo '" + fileName + "'.");
+            System.err.println("Asegúrate de que esté en la carpeta raíz del proyecto.");
+        } // fin agregado
     }
 
 
