@@ -2,6 +2,7 @@ package example;
 
 import java.util.*;
 
+
 public class ExpressionParser {
 
     // Parsea string de expresión a tokens
@@ -14,16 +15,16 @@ public class ExpressionParser {
 
             // Ignorar espacios
             if (Character.isWhitespace(c)) {
-                if (currentToken.length() > 0) {
+                if (!currentToken.isEmpty()) {
                     addToken(tokens, currentToken.toString());
                     currentToken = new StringBuilder();
                 }
                 continue;
             }
 
-            // Operadores y paréntesis
+            // Operadores y parentesis
             if (isOperatorOrParen(c)) {
-                if (currentToken.length() > 0) {
+                if (!currentToken.isEmpty()) {
                     addToken(tokens, currentToken.toString());
                     currentToken = new StringBuilder();
                 }
@@ -33,7 +34,7 @@ public class ExpressionParser {
             }
         }
 
-        if (currentToken.length() > 0) {
+        if (!currentToken.isEmpty()) {
             addToken(tokens, currentToken.toString());
         }
 
@@ -64,7 +65,7 @@ public class ExpressionParser {
         }
     }
 
-    // Validar paréntesis balanceados
+    // Validar parentesis balanceados
     public static boolean isBalanced(String expression) {
         int count = 0;
         for (char c : expression.toCharArray()) {

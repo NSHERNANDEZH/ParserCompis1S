@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class Main {
-    private static IdToBinary idToBinary = new IdToBinary();
+    private static final IdToBinary idToBinary = new IdToBinary();
 
     public static void main(String[] args) {
         // Entrada
@@ -23,11 +23,8 @@ public class Main {
 
         // Tokenizacion
         System.out.println("=== TOKENIZACION ===\n");
-
-// 3. AGREGADO: Bloque try para manejar errores de lectura de archivo**
         try {
-            // 4. CAMBIO: CharStreams.fromString -> CharStreams.fromFileName**
-            CharStream cs = CharStreams.fromFileName(fileName); // fin agregado
+            CharStream cs = CharStreams.fromFileName(fileName);
         ExprLexer lexer = new ExprLexer(cs);
 
         // Recolectar todos los tokens
@@ -51,14 +48,14 @@ public class Main {
             }
         }
 
-        // evaluar con shunting yard
+        // Evaluar con shunting yard
         System.out.println("\n==================================================");
         analyzeAndEvaluate(allTokens);
 
-        } catch (IOException e) { // 5. MANEJO DE ERROR DE ARCHIVO Agregado
+        } catch (IOException e) {
             System.err.println("Error: No se encontró el archivo '" + fileName + "'.");
             System.err.println("Asegúrate de que esté en la carpeta raíz del proyecto.");
-        } // fin agregado
+        }
     }
 
 
@@ -99,14 +96,14 @@ public class Main {
 
                 // No es asignacion, es parte de expresion
                 foundExpression = true;
-                if (expressionBuilder.length() > 0) {
+                if (!expressionBuilder.isEmpty()) {
                     expressionBuilder.append(" ");
                 }
                 expressionBuilder.append(text);
 
             } else if (foundExpression && !"NEWLINE".equals(typeName)) {
                 // Agregar operadores a la expresion
-                if (expressionBuilder.length() > 0) {
+                if (!expressionBuilder.isEmpty()) {
                     expressionBuilder.append(" ");
                 }
                 expressionBuilder.append(text);
