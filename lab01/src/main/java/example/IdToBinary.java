@@ -26,10 +26,7 @@ public class IdToBinary {
             return 0;
         }
         try {
-            int decimal = Integer.parseInt(numberPart, radix);
-            System.out.printf("%s: %s -> Decimal: %d%n",
-                    baseName, numberPart, decimal);
-            return decimal;
+            return Integer.parseInt(numberPart, radix);
         } catch (NumberFormatException e) {
             System.out.printf("Error: '%s' no es un número %s válido%n",
                     numberPart, baseName);

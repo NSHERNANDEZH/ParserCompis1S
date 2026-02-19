@@ -12,12 +12,8 @@ public class Main {
     private static final IdToBinary idToBinary = new IdToBinary();
 
     public static void main(String[] args) {
-        // Entrada
-        String input = "X=BN1000\n" +
-                "Y=BN0010\n" +
-                "Z=OC0011\n" +
-                "X + Y * Z";
-        String fileName = "entrada.txt"; // agregado para el txt
+        String fileName = "entrada.txt";
+
         System.out.println("COMPILADOR - LABORATORIO 1");
         System.out.println("==================================================\n");
 
@@ -35,16 +31,15 @@ public class Main {
 
             String typeName = ExprLexer.VOCABULARY.getSymbolicName(token.getType());
             System.out.printf("Token %-12s  texto: '%s'%n", typeName, token.getText());
-
             // Conversion a decimal
             if ("BIN".equals(typeName)) {
-                System.out.println(idToBinary.convertToDecimal(token.getText()));
+                idToBinary.convertToDecimal(token.getText());
             }
             else if ("HEX".equals(typeName)) {
-                System.out.println(idToBinary.convertToDecimal(token.getText()));
+                idToBinary.convertToDecimal(token.getText());
             }
             else if ("OC".equals(typeName)) {
-                System.out.println(idToBinary.convertToDecimal(token.getText()));
+                idToBinary.convertToDecimal(token.getText());
             }
         }
 
@@ -113,7 +108,7 @@ public class Main {
         // Mostrar tabla de simbolos
         System.out.println("\n=== TABLA DE SIMBOLOS ===\n");
         for (Map.Entry<String, Integer> entry : symbolTable.entrySet()) {
-            System.out.printf("%-15s = %d%n", entry.getKey(), entry.getValue());
+            System.out.printf("%s = %d%n", entry.getKey(), entry.getValue());
         }
 
         // Procesar expresion con Shunting Yard
@@ -122,7 +117,6 @@ public class Main {
             processExpressionWithShuntingYard(expression, symbolTable);
         }
     }
-
 
     private static void processExpressionWithShuntingYard(String expression, Map<String, Integer> symbolTable) {
         System.out.println("\n==================================================");

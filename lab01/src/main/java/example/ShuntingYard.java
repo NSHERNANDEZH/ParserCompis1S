@@ -28,11 +28,7 @@ public class ShuntingYard {
         }
     }
 
-    /**
-     * Convierte expresión infix a postfix usando Shunting Yard
-     * @param tokens Lista de tokens en notación infix
-     * @return Lista de tokens en notación postfix
-     */
+    //Convierte expresión infix a postfix usando Shunting Yard
     public static List<Token> infixToPostfix(List<Token> tokens) {
         List<Token> output = new ArrayList<>();
         Stack<Token> operators = new Stack<>();
@@ -80,12 +76,7 @@ public class ShuntingYard {
         return output;
     }
 
-    /**
-     * Evalúa una expresión en notación postfix
-     * @param postfix Expresión en postfix
-     * @param symbolTable Tabla con valores de variables
-     * @return Resultado de la evaluación
-     */
+    //Evalua una expresion en notacion postfix
     public static int evaluatePostfix(List<Token> postfix, Map<String, Integer> symbolTable)
             throws Exception {
         Stack<Integer> stack = new Stack<>();
@@ -126,46 +117,32 @@ public class ShuntingYard {
         return stack.pop();
     }
 
-    /**
-     * Aplica un operador a dos operandos
-     */
+    //Aplica un operador a dos operandos
     private static int applyOperator(String operator, int a, int b) throws Exception {
-        switch (operator) {
-            case "+":
-                return a + b;
-            case "-":
-                return a - b;
-            case "*":
-                return a * b;
-            case "/":
+        return switch (operator) {
+            case "+" -> a + b;
+            case "-" -> a - b;
+            case "*" -> a * b;
+            case "/" -> {
                 if (b == 0) {
                     throw new Exception("Error: División por cero");
                 }
-                return a / b;
-            default:
-                throw new Exception("Error: Operador desconocido '" + operator + "'");
-        }
+                yield a / b;
+            }
+            default -> throw new Exception("Error: Operador desconocido '" + operator + "'");
+        };
     }
 
-    /**
-     * Retorna la precedencia de un operador
-     */
+    //Retorna la precedencia de un operador
     private static int precedence(String operator) {
-        switch (operator) {
-            case "+":
-            case "-":
-                return 1;
-            case "*":
-            case "/":
-                return 2;
-            default:
-                return 0;
-        }
+        return switch (operator) {
+            case "+", "-" -> 1;
+            case "*", "/" -> 2;
+            default -> 0;
+        };
     }
 
-    /**
-     * Convierte lista de tokens a string para debug
-     */
+    //Convierte lista de tokens a string para debug
     public static String tokensToString(List<Token> tokens) {
         StringBuilder sb = new StringBuilder();
         for (Token token : tokens) {
