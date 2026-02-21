@@ -23,40 +23,69 @@ statement
     ;
 
 // Declaración de variable: stark nombre jarvis 5;
-varDecl: tipo IDENTIFICADOR JARVIS expr;
+varDecl
+    : tipo IDENTIFICADOR JARVIS expr
+    ;
 
 // Asignación: x jarvis 5;
-assignStmt: IDENTIFICADOR JARVIS expr;
+assignStmt
+    : IDENTIFICADOR JARVIS expr
+    ;
 
 // IF / ELSE
-ifStmt: VISION '(' condition ')' block (WANDA block)?;
+ifStmt
+    : VISION '(' condition ')' block (WANDA block)?
+    ;
 
 // WHILE
-whileStmt: LOKI '(' condition ')' block;
+whileStmt
+    : LOKI '(' condition ')' block
+    ;
 
 // FOR
-forStmt: FURY '(' varDecl ';' condition ';' assignStmt ')' block;
+forStmt
+    : FURY '(' varDecl ';' condition ';' assignStmt ')' block
+    ;
 
 // Funciones
-funcDecl: tipo IDENTIFICADOR '(' paramList? ')' block;
+funcDecl
+    : tipo IDENTIFICADOR '(' paramList? ')' block
+    ;
 
-paramList: param (',' param)*;
+paramList
+    : param (',' param)*
+    ;
 
-param: tipo IDENTIFICADOR;
+param
+    : tipo IDENTIFICADOR
+    ;
 
-returnStmt: 'return' expr;
+returnStmt
+    : 'return' expr
+    ;
 
 // Llamada a función
-funcCall: IDENTIFICADOR '(' argList? ')';
+funcCall
+    : IDENTIFICADOR '(' argList? ')'
+    ;
 
-argList: expr (',' expr)*;
+argList
+    : expr (',' expr)*
+    ;
 
 // Read y Write
-readStmt: GAMORA '(' IDENTIFICADOR ')';
-writeStmt: NEBULA '(' expr ')';
+readStmt
+    : GAMORA '(' IDENTIFICADOR ')'
+    ;
+
+writeStmt
+    : NEBULA '(' expr ')'
+    ;
 
 // Import
-importStmt: RECRUIT STRING;
+importStmt
+    : RECRUIT STRING_ROGERS
+    ;
 
 // Bloque de código
 block
@@ -73,23 +102,25 @@ tipo
     ;
 
 // Condiciones
-condition: expr (PARKER | ODIN | JARVIS | NOJARVIS) expr;
+condition
+    : expr (PARKER | ODIN | JARVIS | NOJARVIS) expr
+    ;
 
-// Expresiones con precedencia  (sin recursión izquierda)
+// Expresiones con precedencia correcta (sin recursión izquierda)
 expr
     : expr ('*' | '/') expr    // multiplicación y división
     | expr ('+' | '-') expr    // suma y resta
     | '(' expr ')'             // agrupación
     | funcCall                 // llamada a función
     | IDENTIFICADOR            // variable
-    | NUMERO_INT               // entero
-    | NUMERO_FLOAT             // flotante
-    | STRING                   // cadena
-    | BOOL_VAL                 // true/false
+    | NUMERO_STARK             // entero
+    | NUMERO_BANNER            // flotante
+    | STRING_ROGERS            // cadena
+    | BOOL_THOR                // booleano
     ;
 
 // =====================
-// REGLAS DEX LÉXICO
+// REGLAS DEL LÉXICO
 // =====================
 
 // Tipos (palabras clave)
@@ -105,10 +136,10 @@ WANDA   : 'wanda'   ;   // else
 LOKI    : 'loki'    ;   // while
 FURY    : 'fury'    ;   // for
 
-// Otros
+// Entrada / Salida / Importación
+GAMORA  : 'gamora'  ;   // read
+NEBULA  : 'nebula'  ;   // write
 RECRUIT : 'recruit' ;   // import
-GAMORA    : 'gamora'    ;   // read
-NEBULA   : 'nebula'   ;   // write
 
 // Niveles de acceso
 CITIZEN : 'citizen' ;   // public
@@ -116,21 +147,21 @@ SHIELD  : 'shield'  ;   // protected
 HYDRA   : 'hydra'   ;   // private
 HAPPY   : 'happy'   ;   // default
 
-// Operadores / desigualdades
+// Operadores y desigualdades
 JARVIS  : 'jarvis'  ;   // =
-PARKER  : 'parker'  ;   //
+PARKER  : 'parker'  ;   // <
 ODIN    : 'odin'    ;   // >
 NOJARVIS: 'nojarvis';   // !=
 
-// Literales
-BOOL_VAL    : 'TRUE' | 'FALSE' ;
-NUMERO_INT  : [0-9]+ ;
-NUMERO_FLOAT: [0-9]+ '.' [0-9]+ ;
-STRING      : '"' (~["\r\n])* '"' ;
+// Literales (NUMERO_BANNER antes que NUMERO_STARK para evitar conflictos)
+BOOL_THOR     : 'TRUE' | 'FALSE'        ;   // booleano
+NUMERO_BANNER : [0-9]+ '.' [0-9]+       ;   // flotante
+NUMERO_STARK  : [0-9]+                  ;   // entero
+STRING_ROGERS : '"' (~["\r\n])* '"'     ;   // cadena
 
-// Identificadores (deben ir DESPUÉS de palabras clave)
+// Identificadores (deben ir DESPUÉS de todas las palabras clave)
 IDENTIFICADOR : [a-zA-Z_][a-zA-Z0-9_]* ;
 
 // Ignorar espacios y comentarios
-WS      : [ \t\r\n]+ -> skip ;
-COMMENT : '//' ~[\r\n]* -> skip ;
+WS      : [ \t\r\n]+    -> skip ;
+COMMENT : '//' ~[\r\n]*  -> skip ;
