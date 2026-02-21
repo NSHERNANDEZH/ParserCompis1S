@@ -9,27 +9,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * ╔══════════════════════════════════════════════════════════╗
- *  COMPILADORES - FASE I: ANALIZADOR LÉXICO
- *  Universidad Rafael Landívar
- *  Curso: Compiladores | Mgtr. Moises Alonso
- * ╚══════════════════════════════════════════════════════════╝
- *
- *  Descripción:
- *      Analizador léxico basado en ANTLR4 para el lenguaje
- *      "Avenger". Lee un archivo fuente, tokeniza su contenido
- *      y muestra el listado de tokens junto con errores léxicos.
- *
- *  Uso:
- *      Correr Main con el path del archivo fuente como argumento.
- *      Ejemplo: testing/prueba1.txt
- */
 public class Main {
 
-    // ═══════════════════════════════════════════
-    //  COLORES ANSI para salida en consola
-    // ═══════════════════════════════════════════
     private static final String RESET   = "\u001B[0m";
     private static final String BOLD    = "\u001B[1m";
     private static final String CYAN    = "\u001B[36m";
@@ -43,17 +24,18 @@ public class Main {
     public static void main(String[] args) {
 
         printBanner();
+        Musica.play("cancionAvengers.wav"); //  Una sola línea
+
         String rutaArchivo;
 
-        // Si se pasó argumento, usarlo; si no, pedirlo por consola
         if (args.length >= 1) {
             rutaArchivo = args[0];
         } else {
-            System.out.print(CYAN + BOLD + "  📂 Ingresá el nombre del archivo: " + RESET);
+            System.out.print(CYAN + BOLD + "   Ingresá el nombre del archivo: " + RESET);
             Scanner scanner = new Scanner(System.in);
             rutaArchivo = scanner.nextLine().trim();
         }
-        // ── Leer archivo ───────────────────────────────────────
+
         String codigoFuente;
         try {
             codigoFuente = new String(Files.readAllBytes(Paths.get(rutaArchivo)));
@@ -63,38 +45,28 @@ public class Main {
             return;
         }
 
-        System.out.println(CYAN + BOLD + "  📄 Archivo: " + RESET + WHITE + rutaArchivo + RESET);
+        System.out.println(CYAN + BOLD + "  Archivo: " + RESET + WHITE + rutaArchivo + RESET);
         System.out.println(CYAN + "  ──────────────────────────────────────────────────" + RESET);
         System.out.println();
 
-        // ── Crear stream de entrada ────────────────────────────
         CharStream input = CharStreams.fromString(codigoFuente);
-
-        // ── Instanciar el Lexer generado por ANTLR ────────────
         AvengerLexer lexer = new AvengerLexer(input);
 
-        // ── Listener de errores léxicos personalizado ─────────
         LexerErrorListener errorListener = new LexerErrorListener();
-        lexer.removeErrorListeners();           // quitar listener por defecto
-        lexer.addErrorListener(errorListener);  // agregar el nuestro
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(errorListener);
 
-        // ── Obtener todos los tokens ───────────────────────────
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         tokenStream.fill();
         List<Token> tokens = tokenStream.getTokens();
 
-        // ── Imprimir tabla de tokens ───────────────────────────
         printTokenTable(tokens, lexer);
-
-        // ── Imprimir resumen ───────────────────────────────────
         printSummary(tokens, errorListener.getErrorCount());
+
+        Musica.stop(); // Detiene la música al terminar
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  Imprime la tabla de tokens encontrados
-    // ═══════════════════════════════════════════════════════════
     private static void printTokenTable(List<Token> tokens, AvengerLexer lexer) {
-
         System.out.println(BOLD + CYAN
                 + "  ┌──────┬──────────────────────────┬──────────────────────────────┬──────┬────────┐"
                 + RESET);
@@ -105,12 +77,8 @@ public class Main {
                 + RESET);
 
         int contador = 0;
-
         for (Token token : tokens) {
-
-            // Ignorar EOF en la tabla
             if (token.getType() == Token.EOF) continue;
-
             contador++;
 
             String tipoNombre = lexer.getVocabulary().getSymbolicName(token.getType());
@@ -119,16 +87,12 @@ public class Main {
                     .replace("\r", "\\r");
             int    linea      = token.getLine();
             int    columna    = token.getCharPositionInLine();
+            String color      = getColorForToken(tipoNombre);
 
-            // Color según categoría
-            String color = getColorForToken(tipoNombre);
+            if (tipoNombre == null)   tipoNombre = "DESCONOCIDO";
+            if (lexema.length() > 28) lexema = lexema.substring(0, 25) + "...";
 
-            // Truncar si el texto es muy largo
-            if (tipoNombre == null)      tipoNombre = "DESCONOCIDO";
-            if (lexema.length() > 28)    lexema = lexema.substring(0, 25) + "...";
-
-            System.out.printf(color
-                            + "  │ %-4d │ %-24s │ %-28s │ %-4d │ %-6d │%n" + RESET,
+            System.out.printf(color + "  │ %-4d │ %-24s │ %-28s │ %-4d │ %-6d │%n" + RESET,
                     contador, tipoNombre, lexema, linea, columna);
         }
 
@@ -138,79 +102,63 @@ public class Main {
         System.out.println();
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  Color ANSI según categoría del token
-    // ═══════════════════════════════════════════════════════════
     private static String getColorForToken(String tipo) {
         if (tipo == null) return RED;
-
         if (tipo.equals("STARK") || tipo.equals("BANNER") ||
-                tipo.equals("ROGERS") || tipo.equals("THOR") || tipo.equals("BOB")) {
+                tipo.equals("ROGERS") || tipo.equals("THOR") || tipo.equals("BOB"))
             return MAGENTA;
-        } else if (tipo.equals("VISION") || tipo.equals("WANDA") ||
-                tipo.equals("LOKI") || tipo.equals("FURY")) {
+        else if (tipo.equals("VISION") || tipo.equals("WANDA") ||
+                tipo.equals("LOKI") || tipo.equals("FURY"))
             return BLUE;
-        } else if (tipo.equals("JARVIS") || tipo.equals("PARKER") ||
-                tipo.equals("ODIN") || tipo.equals("NOJARVIS")) {
+        else if (tipo.equals("JARVIS") || tipo.equals("PARKER") ||
+                tipo.equals("ODIN") || tipo.equals("NOJARVIS"))
             return YELLOW;
-        } else if (tipo.equals("NUMERO_INT") || tipo.equals("NUMERO_FLOAT") ||
-                tipo.equals("STRING") || tipo.equals("BOOL_VAL")) {
+        else if (tipo.equals("NUMERO_STARK") || tipo.equals("NUMERO_BANNER") ||
+                tipo.equals("STRING_ROGERS") || tipo.equals("BOOL_THOR"))
             return GREEN;
-        } else if (tipo.equals("IDENTIFICADOR")) {
+        else if (tipo.equals("IDENTIFICADOR"))
             return WHITE;
-        } else {
+        else
             return CYAN;
-        }
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  Resumen final del análisis
-    // ═══════════════════════════════════════════════════════════
     private static void printSummary(List<Token> tokens, int errores) {
-
         long totalTokens = tokens.stream()
                 .filter(t -> t.getType() != Token.EOF)
                 .count();
 
-        System.out.println(BOLD + CYAN  + "  ╔══════════════════════════════════╗" + RESET);
-        System.out.println(BOLD + CYAN  + "  ║       RESUMEN DEL ANÁLISIS       ║" + RESET);
-        System.out.println(BOLD + CYAN  + "  ╠══════════════════════════════════╣" + RESET);
-        System.out.printf (BOLD + CYAN  + "  ║" + RESET
-                + GREEN  + "  ✔ Tokens encontrados : %-9d" + RESET
+        System.out.println(BOLD + CYAN + "  ╔══════════════════════════════════╗" + RESET);
+        System.out.println(BOLD + CYAN + "  ║       RESUMEN DEL ANÁLISIS       ║" + RESET);
+        System.out.println(BOLD + CYAN + "  ╠══════════════════════════════════╣" + RESET);
+        System.out.printf(BOLD + CYAN + "  ║" + RESET
+                + GREEN + "  ✔ Tokens encontrados : %-9d" + RESET
                 + BOLD + CYAN + "║%n" + RESET, totalTokens);
-        System.out.printf (BOLD + CYAN  + "  ║" + RESET
+        System.out.printf(BOLD + CYAN + "  ║" + RESET
                         + (errores > 0 ? RED : GREEN)
-                        + "  %s Errores léxicos   : %-9d" + RESET
+                        + "  %s Errores léxicos   : %-9d" + RESET  // ← el %s estaba quitado
                         + BOLD + CYAN + "║%n" + RESET,
                 errores > 0 ? "✘" : "✔", errores);
-        System.out.println(BOLD + CYAN  + "  ╚══════════════════════════════════╝" + RESET);
+        System.out.println(BOLD + CYAN + "  ╚══════════════════════════════════╝" + RESET);
         System.out.println();
 
-        if (errores == 0) {
-            System.out.println(GREEN + BOLD + "  ✔ Análisis léxico completado sin errores." + RESET);
-        } else {
+        if (errores == 0)
+            System.out.println(GREEN + BOLD + "   Análisis léxico completado sin errores." + RESET);
+        else
             System.out.println(RED + BOLD
-                    + "  ✘ Se encontraron " + errores + " error(es) léxico(s). Revisá el código fuente." + RESET);
-        }
+                    + "  Se encontraron " + errores + " error(es) léxico(s). Revisá el código fuente." + RESET);
         System.out.println();
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  Mensaje de error formateado
-    // ═══════════════════════════════════════════════════════════
     private static void printError(String mensaje) {
-        System.out.println(RED + BOLD + "\n  ✘ ERROR: " + mensaje + RESET + "\n");
+        System.out.println(RED + BOLD + "\n   ERROR: " + mensaje + RESET + "\n");
     }
 
-    // ═══════════════════════════════════════════════════════════
-    //  Banner de bienvenida
-    // ═══════════════════════════════════════════════════════════
     private static void printBanner() {
         System.out.println();
-        System.out.println(BOLD + CYAN    + "  ╔══════════════════════════════════════════════════════════╗" + RESET);
-        System.out.println(BOLD + CYAN    + "  ║" + RESET + MAGENTA + BOLD + "          ⚡  ANALIZADOR LÉXICO  -  AVENGER  ⚡           " + RESET + BOLD + CYAN + "║" + RESET);
-        System.out.println(BOLD + CYAN    + "  ║" + RESET + WHITE         + "         Compiladores · Universidad Rafael Landívar       " + RESET + BOLD + CYAN + "║" + RESET);
-        System.out.println(BOLD + CYAN    + "  ╚══════════════════════════════════════════════════════════╝" + RESET);
+        System.out.println(BOLD + CYAN + "  ╔══════════════════════════════════════════════════════════╗" + RESET);
+        System.out.println(BOLD + CYAN + "  ║" + RESET + MAGENTA + BOLD + "           ANALIZADOR LÉXICO  -  AvengerScript            " + RESET + BOLD + CYAN + "║" + RESET);
+        System.out.println(BOLD + CYAN + "  ║" + RESET + WHITE + "         Compiladores · Universidad Rafael Landívar       " + RESET + BOLD + CYAN + "║" + RESET);
+        System.out.println(BOLD + CYAN + "  ╚══════════════════════════════════════════════════════════╝" + RESET);
         System.out.println();
     }
 }
@@ -233,16 +181,13 @@ class LexerErrorListener extends BaseErrorListener {
                             int charPositionInLine,
                             String msg,
                             RecognitionException e) {
-
         errorCount++;
         System.out.printf(RED + BOLD
-                        + "  ✘ ERROR LÉXICO [línea %d, col %d]: Símbolo no reconocido → '%s'%n"
+                        + "   ERROR LÉXICO [línea %d, col %d]: Símbolo no reconocido → '%s'%n"
                         + RESET,
                 line, charPositionInLine,
                 offendingSymbol != null ? offendingSymbol : "?");
     }
 
-    public int getErrorCount() {
-        return errorCount;
-    }
+    public int getErrorCount() { return errorCount; }
 }

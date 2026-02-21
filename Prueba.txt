@@ -1,6 +1,6 @@
 stark edad jarvis 0;
 read(edad);
-vision (edad odin 18) {
+vision(edad odin 18) {
     write("Sos mayor de edad");
 } wanda {
     write("Sos menor de edad");
