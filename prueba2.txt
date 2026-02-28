@@ -1,0 +1,22 @@
+// Prueba 2: Operacion Aritmetica Basica
+// Lenguaje: Avenger
+// Descripcion: Declara dos enteros, los suma y muestra el resultado
+
+stark a jarvis 10;
+stark b jarvis 5;
+stark resultado jarvis a + b;
+
+nebula("Suma: ");
+nebula(resultado);
+
+stark resta jarvis a - b;
+nebula("Resta: ");
+nebula(resta);
+
+stark producto jarvis a * b;
+nebula("Producto: ");
+nebula(producto);
+
+stark division jarvis a / b;
+nebula("Division: ");
+nebula(division);

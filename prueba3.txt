@@ -1,0 +1,19 @@
+// Prueba 3: Input de datos y estructura if
+// Lenguaje: Avenger
+// Descripcion: Lee un numero ingresado por el usuario
+//              y decide si es positivo, negativo o cero
+
+stark numero jarvis 0;
+
+nebula("Ingrese un numero: ");
+gamora(numero);
+
+vision (numero odin 0) {
+    nebula("El numero es positivo");
+} wanda {
+    vision (numero parker 0) {
+        nebula("El numero es negativo");
+    } wanda {
+        nebula("El numero es cero");
+    }
+}

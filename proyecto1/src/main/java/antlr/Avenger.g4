@@ -9,17 +9,17 @@ prog
     ;
 
 statement
-    : varDecl ';'
-    | assignStmt ';'
+    : varDecl SEMI
+    | assignStmt SEMI
     | ifStmt
     | whileStmt
     | forStmt
     | funcDecl
-    | returnStmt ';'
-    | readStmt ';'
-    | writeStmt ';'
-    | importStmt ';'
-    | funcCall ';'
+    | returnStmt SEMI
+    | readStmt SEMI
+    | writeStmt SEMI
+    | importStmt SEMI
+    | funcCall SEMI
     ;
 
 // Declaración de variable: stark nombre jarvis 5;
@@ -34,26 +34,26 @@ assignStmt
 
 // IF / ELSE
 ifStmt
-    : VISION '(' condition ')' block (WANDA block)?
+    : VISION LPAREN condition RPAREN block (WANDA block)?
     ;
 
 // WHILE
 whileStmt
-    : LOKI '(' condition ')' block
+    : LOKI LPAREN condition RPAREN block
     ;
 
 // FOR
 forStmt
-    : FURY '(' varDecl ';' condition ';' assignStmt ')' block
+    : FURY LPAREN varDecl SEMI condition SEMI assignStmt RPAREN block
     ;
 
 // Funciones
 funcDecl
-    : tipo IDENTIFICADOR '(' paramList? ')' block
+    : tipo IDENTIFICADOR LPAREN paramList? RPAREN block
     ;
 
 paramList
-    : param (',' param)*
+    : param (COMMA param)*
     ;
 
 param
@@ -61,25 +61,25 @@ param
     ;
 
 returnStmt
-    : 'return' expr
+    : RETURN expr
     ;
 
 // Llamada a función
 funcCall
-    : IDENTIFICADOR '(' argList? ')'
+    : IDENTIFICADOR LPAREN argList? RPAREN
     ;
 
 argList
-    : expr (',' expr)*
+    : expr (COMMA expr)*
     ;
 
 // Read y Write
 readStmt
-    : GAMORA '(' IDENTIFICADOR ')'
+    : GAMORA LPAREN IDENTIFICADOR RPAREN
     ;
 
 writeStmt
-    : NEBULA '(' expr ')'
+    : NEBULA LPAREN expr RPAREN
     ;
 
 // Import
@@ -89,7 +89,7 @@ importStmt
 
 // Bloque de código
 block
-    : '{' statement* '}'
+    : LBRACE statement* RBRACE
     ;
 
 // Tipos primitivos
@@ -106,62 +106,98 @@ condition
     : expr (PARKER | ODIN | JARVIS | NOJARVIS) expr
     ;
 
-// Expresiones con precedencia correcta (sin recursión izquierda)
+// -------------------------------------------------------
+// Expresiones con precedencia correcta
+// SIN recursión a la izquierda: se usa el patrón iterativo
+//   expr  → term  ( ('+' | '-') term  )*
+//   term  → factor( ('*' | '/') factor)*
+//   factor→ '-' factor | atom
+// -------------------------------------------------------
 expr
-    : expr ('*' | '/') expr    // multiplicación y división
-    | expr ('+' | '-') expr    // suma y resta
-    | '(' expr ')'             // agrupación
-    | funcCall                 // llamada a función
-    | IDENTIFICADOR            // variable
-    | NUMERO_STARK             // entero
-    | NUMERO_BANNER            // flotante
-    | STRING_ROGERS            // cadena
-    | BOOL_THOR                // booleano
+    : term ((PLUS | MINUS) term)*
+    ;
+
+term
+    : factor ((MULT | DIV) factor)*
+    ;
+
+factor
+    : MINUS factor
+    | atom
+    ;
+
+atom
+    : LPAREN expr RPAREN
+    | funcCall
+    | IDENTIFICADOR
+    | NUMERO_STARK
+    | NUMERO_BANNER
+    | STRING_ROGERS
+    | BOOL_THOR
     ;
 
 // =====================
 // REGLAS DEL LÉXICO
 // =====================
 
-// Tipos (palabras clave)
+// ----- Tipos (palabras clave) -----
 STARK   : 'stark'   ;   // int
 BANNER  : 'banner'  ;   // float
 ROGERS  : 'rogers'  ;   // string
 THOR    : 'thor'    ;   // boolean
 BOB     : 'bob'     ;   // void
 
-// Estructuras de control
+// ----- Estructuras de control -----
 VISION  : 'vision'  ;   // if
 WANDA   : 'wanda'   ;   // else
 LOKI    : 'loki'    ;   // while
 FURY    : 'fury'    ;   // for
 
-// Entrada / Salida / Importación
+// ----- Entrada / Salida / Importación -----
 GAMORA  : 'gamora'  ;   // read
 NEBULA  : 'nebula'  ;   // write
 RECRUIT : 'recruit' ;   // import
 
-// Niveles de acceso
+// ----- Niveles de acceso -----
 CITIZEN : 'citizen' ;   // public
 SHIELD  : 'shield'  ;   // protected
 HYDRA   : 'hydra'   ;   // private
 HAPPY   : 'happy'   ;   // default
 
-// Operadores y desigualdades
+// ----- Otras palabras clave -----
+RETURN  : 'return'  ;
+
+// ----- Operadores de comparación / asignación -----
 JARVIS  : 'jarvis'  ;   // =
 PARKER  : 'parker'  ;   // <
 ODIN    : 'odin'    ;   // >
 NOJARVIS: 'nojarvis';   // !=
 
-// Literales (NUMERO_BANNER antes que NUMERO_STARK para evitar conflictos)
+// ----- Operadores aritméticos -----
+PLUS    : '+'  ;
+MINUS   : '-'  ;
+MULT    : '*'  ;
+DIV     : '/'  ;
+
+// ----- Símbolos especiales (tokens nombrados) -----
+// Definidos para que no los genere como tokens no identificados
+LPAREN  : '('  ;   // paréntesis abre
+RPAREN  : ')'  ;   // paréntesis cierra
+LBRACE  : '{'  ;   // llave abre
+RBRACE  : '}'  ;   // llave cierra
+SEMI    : ';'  ;   // punto y coma
+COMMA   : ','  ;   // coma
+
+// ----- Literales -----
+
 BOOL_THOR     : 'TRUE' | 'FALSE'        ;   // booleano
 NUMERO_BANNER : [0-9]+ '.' [0-9]+       ;   // flotante
 NUMERO_STARK  : [0-9]+                  ;   // entero
 STRING_ROGERS : '"' (~["\r\n])* '"'     ;   // cadena
 
-// Identificadores (deben ir DESPUÉS de todas las palabras clave)
+// ----- Identificadores -----
 IDENTIFICADOR : [a-zA-Z_][a-zA-Z0-9_]* ;
 
-// Ignorar espacios y comentarios
+// ----- Ignorar espacios y comentarios -----
 WS      : [ \t\r\n]+    -> skip ;
 COMMENT : '//' ~[\r\n]*  -> skip ;

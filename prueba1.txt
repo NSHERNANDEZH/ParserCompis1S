@@ -1,0 +1,5 @@
+// Prueba 1: Hola Mundo
+// Lenguaje: Avenger
+// Descripcion: Programa que imprime un saludo en pantalla
+
+nebula("Hola Mundo");
