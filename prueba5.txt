@@ -1,0 +1,9 @@
+//declarar y llamar funcion
+stark calcularDoble(stark n) {
+    return n * 2;
+}
+
+stark base jarvis 50;
+stark resultado jarvis calcularDoble(base);
+nebula("El doble de la base es: ");
+nebula(resultado);

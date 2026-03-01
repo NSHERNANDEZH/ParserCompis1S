@@ -1,0 +1,7 @@
+//bucle Fury
+banner acumulador jarvis 0.0;
+fury (stark i jarvis 1; i parker 5; i jarvis i + 1) {
+    acumulador jarvis acumulador + 2.5;
+    nebula("Suma parcial: ");
+    nebula(acumulador);
+}
