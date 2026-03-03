@@ -24,7 +24,6 @@ public class Main {
     public static void main(String[] args) {
 
         printBanner();
-        Musica.play("cancionAvengers.wav"); //  Una sola línea
 
         String rutaArchivo;
 
@@ -34,6 +33,10 @@ public class Main {
             System.out.print(CYAN + BOLD + "   Ingresá el nombre del archivo: " + RESET);
             Scanner scanner = new Scanner(System.in);
             rutaArchivo = scanner.nextLine().trim();
+
+            if (!Files.exists(Paths.get(rutaArchivo))) {
+                rutaArchivo = "proyecto1/testing/" + rutaArchivo;
+            }
         }
 
         String codigoFuente;
@@ -62,8 +65,6 @@ public class Main {
 
         printTokenTable(tokens, lexer);
         printSummary(tokens, errorListener.getErrorCount());
-
-        Musica.stop(); // Detiene la música al terminar
     }
 
     private static void printTokenTable(List<Token> tokens, AvengerLexer lexer) {
@@ -82,12 +83,13 @@ public class Main {
             contador++;
 
             String tipoNombre = lexer.getVocabulary().getSymbolicName(token.getType());
-            String lexema     = token.getText()
+            String lexema = token.getText()
                     .replace("\n", "\\n")
                     .replace("\r", "\\r");
-            int    linea      = token.getLine();
-            int    columna    = token.getCharPositionInLine();
-            String color      = getColorForToken(tipoNombre);
+
+            int linea   = token.getLine();
+            int columna = token.getCharPositionInLine();
+            String color = getColorForToken(tipoNombre);
 
             if (tipoNombre == null)   tipoNombre = "DESCONOCIDO";
             if (lexema.length() > 28) lexema = lexema.substring(0, 25) + "...";
@@ -104,20 +106,26 @@ public class Main {
 
     private static String getColorForToken(String tipo) {
         if (tipo == null) return RED;
+
         if (tipo.equals("STARK") || tipo.equals("BANNER") ||
                 tipo.equals("ROGERS") || tipo.equals("THOR") || tipo.equals("BOB"))
             return MAGENTA;
+
         else if (tipo.equals("VISION") || tipo.equals("WANDA") ||
                 tipo.equals("LOKI") || tipo.equals("FURY"))
             return BLUE;
+
         else if (tipo.equals("JARVIS") || tipo.equals("PARKER") ||
                 tipo.equals("ODIN") || tipo.equals("NOJARVIS"))
             return YELLOW;
+
         else if (tipo.equals("NUMERO_STARK") || tipo.equals("NUMERO_BANNER") ||
                 tipo.equals("STRING_ROGERS") || tipo.equals("BOOL_THOR"))
             return GREEN;
+
         else if (tipo.equals("IDENTIFICADOR"))
             return WHITE;
+
         else
             return CYAN;
     }
@@ -130,14 +138,17 @@ public class Main {
         System.out.println(BOLD + CYAN + "  ╔══════════════════════════════════╗" + RESET);
         System.out.println(BOLD + CYAN + "  ║       RESUMEN DEL ANÁLISIS       ║" + RESET);
         System.out.println(BOLD + CYAN + "  ╠══════════════════════════════════╣" + RESET);
+
         System.out.printf(BOLD + CYAN + "  ║" + RESET
                 + GREEN + "  ✔ Tokens encontrados : %-9d" + RESET
                 + BOLD + CYAN + "║%n" + RESET, totalTokens);
+
         System.out.printf(BOLD + CYAN + "  ║" + RESET
                         + (errores > 0 ? RED : GREEN)
-                        + "  %s Errores léxicos   : %-9d" + RESET  // ← el %s estaba quitado
+                        + "  %s Errores léxicos   : %-9d" + RESET
                         + BOLD + CYAN + "║%n" + RESET,
                 errores > 0 ? "✘" : "✔", errores);
+
         System.out.println(BOLD + CYAN + "  ╚══════════════════════════════════╝" + RESET);
         System.out.println();
 
@@ -145,7 +156,9 @@ public class Main {
             System.out.println(GREEN + BOLD + "   Análisis léxico completado sin errores." + RESET);
         else
             System.out.println(RED + BOLD
-                    + "  Se encontraron " + errores + " error(es) léxico(s). Revisá el código fuente." + RESET);
+                    + "   Se encontraron " + errores + " error(es) léxico(s). Revisá el código fuente."
+                    + RESET);
+
         System.out.println();
     }
 
@@ -156,8 +169,12 @@ public class Main {
     private static void printBanner() {
         System.out.println();
         System.out.println(BOLD + CYAN + "  ╔══════════════════════════════════════════════════════════╗" + RESET);
-        System.out.println(BOLD + CYAN + "  ║" + RESET + MAGENTA + BOLD + "           ANALIZADOR LÉXICO  -  AvengerScript            " + RESET + BOLD + CYAN + "║" + RESET);
-        System.out.println(BOLD + CYAN + "  ║" + RESET + WHITE + "         Compiladores · Universidad Rafael Landívar       " + RESET + BOLD + CYAN + "║" + RESET);
+        System.out.println(BOLD + CYAN + "  ║" + RESET + MAGENTA + BOLD
+                + "           ANALIZADOR LÉXICO  -  AvengerScript            "
+                + RESET + BOLD + CYAN + "║" + RESET);
+        System.out.println(BOLD + CYAN + "  ║" + RESET + WHITE
+                + "         Compiladores · Universidad Rafael Landívar       "
+                + RESET + BOLD + CYAN + "║" + RESET);
         System.out.println(BOLD + CYAN + "  ╚══════════════════════════════════════════════════════════╝" + RESET);
         System.out.println();
     }
