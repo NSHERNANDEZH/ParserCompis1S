@@ -4,80 +4,68 @@ grammar Avenger;
 // REGLAS DEL PARSER
 // =====================
 
+
 prog
     : statement* EOF
     ;
-
+//El numero de producción se verá reflejado en el arbol con el comando
+// antlr4-parse.exe Avenger.g4 prog -gui -input 'Nombre del test'.txt
 statement
-    : tipoVar IDENTIFICADOR JARVIS expr SEMI                     # StmtVarDecl
-    | IDENTIFICADOR JARVIS expr SEMI                             # StmtAssign
+    : tipoVar IDENTIFICADOR JARVIS expr SEMI                        # StmtVarDecl      //Produccion 1
+    | IDENTIFICADOR JARVIS expr SEMI                                # StmtAssign       //Produccion 2
     | VISION LPAREN condition RPAREN LBRACE statement* RBRACE
-      (WANDA LBRACE statement* RBRACE)?                          # StmtIf
-    | LOKI LPAREN condition RPAREN LBRACE statement* RBRACE      # StmtWhile
+      (WANDA LBRACE statement* RBRACE)?                             # StmtIf           //Produccion 3
+    | LOKI LPAREN condition RPAREN LBRACE statement* RBRACE         # StmtWhile        //Produccion 4
     | FURY LPAREN tipoVar IDENTIFICADOR JARVIS expr SEMI
              condition SEMI
              IDENTIFICADOR JARVIS expr
-      RPAREN LBRACE statement* RBRACE                            # StmtFor
+      RPAREN LBRACE statement* RBRACE                               # StmtFor          //Produccion 5
     | tipoVar IDENTIFICADOR LPAREN (param (COMMA param)*)? RPAREN
-      LBRACE statement* RBRACE                                   # StmtFuncDecl
+      LBRACE statement* RBRACE                                      # StmtFuncDecl     //Produccion 6
     | BOB IDENTIFICADOR LPAREN (param (COMMA param)*)? RPAREN
-      LBRACE statement* RBRACE                                   # StmtFuncDeclVoid
-    | RETURN expr SEMI                                           # StmtReturn
-    | GAMORA LPAREN IDENTIFICADOR RPAREN SEMI                    # StmtRead
-    | NEBULA LPAREN expr RPAREN SEMI                             # StmtWrite
-    | RECRUIT STRING_ROGERS SEMI                                 # StmtImport
-    | IDENTIFICADOR LPAREN (expr (COMMA expr)*)? RPAREN SEMI     # StmtFuncCall
+      LBRACE statement* RBRACE                                      # StmtFuncDeclVoid //Produccion 7
+    | RETURN expr SEMI                                              # StmtReturn       //Produccion 8
+    | GAMORA LPAREN IDENTIFICADOR RPAREN SEMI                       # StmtRead         //Produccion 9
+    | NEBULA LPAREN expr RPAREN SEMI                                # StmtWrite        //Produccion 10
+    | RECRUIT STRING_ROGERS SEMI                                    # StmtImport       //Produccion 11
+    | IDENTIFICADOR LPAREN (expr (COMMA expr)*)? RPAREN SEMI        # StmtFuncCall     //Produccion 12
     ;
 
 // --- Tipos ---
 
 tipoVar
-    : STARK     # TipoInt
-    | BANNER    # TipoFloat
-    | ROGERS    # TipoString
-    | THOR      # TipoBool
+    : STARK | BANNER | ROGERS | THOR    # TipoVar  //Produccion 1
     ;
 
 param
-    : tipoVar IDENTIFICADOR
+    : tipoVar IDENTIFICADOR  //Produccion 1
     ;
 
 // --- Condición ---
 
 condition
-    : expr opRel expr
-    ;
-
-opRel
-    : PARKER    # OpMenor
-    | ODIN      # OpMayor
-    | NOJARVIS  # OpDistinto
-    | EQEQ      # OpIgual
+    : expr (PARKER | ODIN | NOJARVIS | EQEQ) expr  //Produccion 1
     ;
 
 // --- Expresiones ---
 
 expr
-    : expr PLUS term    # ExprSuma
-    | expr MINUS term   # ExprResta
-    | term              # ExprTerm
+    : expr (MULT | DIV) expr      # ExprMulDiv    //Produccion 1
+    | expr (PLUS | MINUS) expr    # ExprSumResta  //Produccion 2
+    | primary                     # ExprPrimary   //Produccion 3
     ;
 
-term
-    : term MULT primary    # TermMult
-    | term DIV primary     # TermDiv
-    | primary              # TermPrimary
-    ;
+// --- Primary ---
 
 primary
-    : MINUS primary                                          # PrimaryNegativo
-    | LPAREN expr RPAREN                                     # PrimaryAgrupado
-    | IDENTIFICADOR LPAREN (expr (COMMA expr)*)? RPAREN      # PrimaryFuncCall
-    | IDENTIFICADOR                                          # PrimaryId
-    | NUMERO_STARK                                           # PrimaryEntero
-    | NUMERO_BANNER                                          # PrimaryFlotante
-    | STRING_ROGERS                                          # PrimaryCadena
-    | BOOL_THOR                                              # PrimaryBooleano
+    : MINUS primary                                             # PrimaryNegativo  //Produccion 1
+    | LPAREN expr RPAREN                                        # PrimaryAgrupado  //Produccion 2
+    | IDENTIFICADOR LPAREN (expr (COMMA expr)*)? RPAREN         # PrimaryFuncCall  //Produccion 3
+    | IDENTIFICADOR                                             # PrimaryId        //Produccion 4
+    | NUMERO_STARK                                              # PrimaryEntero    //Produccion 5
+    | NUMERO_BANNER                                             # PrimaryFlotante  //Produccion 6
+    | STRING_ROGERS                                             # PrimaryCadena    //Produccion 7
+    | BOOL_THOR                                                 # PrimaryBooleano  //Produccion 8
     ;
 
 // =====================

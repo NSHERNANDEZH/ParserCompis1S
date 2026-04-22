@@ -1,13 +1,16 @@
 package example;
 
-import antlr.AvengerLexer;
-import org.antlr.v4.runtime.*;
 
+import antlr.*;
+import org.antlr.v4.runtime.*;
+import java.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Scanner;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 public class Main {
 
@@ -65,6 +68,15 @@ public class Main {
 
         printTokenTable(tokens, lexer);
         printSummary(tokens, errorListener.getErrorCount());
+
+        AvengerParser parser = new AvengerParser(tokenStream);
+
+        ParseTree tree =  parser.prog();
+
+        //Mostrar arbol como texto
+        System.out.println("Visitando Nodos");
+        EvalVisitor evalVisitor = new EvalVisitor();
+        evalVisitor.visit(tree);
     }
 
     private static void printTokenTable(List<Token> tokens, AvengerLexer lexer) {
