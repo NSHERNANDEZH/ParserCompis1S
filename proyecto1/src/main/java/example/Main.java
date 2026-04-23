@@ -3,11 +3,9 @@ package example;
 
 import antlr.*;
 import org.antlr.v4.runtime.*;
-import java.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Scanner;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -73,10 +71,18 @@ public class Main {
 
         ParseTree tree =  parser.prog();
 
-        //Mostrar arbol como texto
-        System.out.println("Visitando Nodos");
+        //Mostrar traduccion a codigo JAVA
         EvalVisitor evalVisitor = new EvalVisitor();
         evalVisitor.visit(tree);
+
+        // Después de evalVisitor.visit(tree);
+        System.out.println(GREEN + BOLD + "\n  ── CÓDIGO JAVA GENERADO ──\n" + RESET);
+        System.out.println(evalVisitor.getJavaCode());
+
+        System.out.println(CYAN + BOLD + "\n  ── TABLA DE SÍMBOLOS ──\n" + RESET);
+        for (Variable v : evalVisitor.getSymbolTable()) {
+            System.out.println("  " + v);
+        }
     }
 
     private static void printTokenTable(List<Token> tokens, AvengerLexer lexer) {

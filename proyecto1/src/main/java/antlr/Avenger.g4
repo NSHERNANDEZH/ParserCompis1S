@@ -94,11 +94,11 @@ RECRUIT : 'recruit' ;
 RETURN  : 'return'  ;
 
 // ----- Operadores -----
-JARVIS  : 'jarvis'  ;
-PARKER  : '<'       ;
-ODIN    : '>'       ;
-NOJARVIS: '!='      ;
-EQEQ    : '=='      ;
+JARVIS          : 'jarvis'  ; // ==
+PARKER          : '<'       ;
+ODIN            : '>'       ;
+NOJARVIS        : '!='      ;
+JARVISJARVIS    : '=='      ;
 
 PLUS    : '+'       ;
 MINUS   : '-'       ;
