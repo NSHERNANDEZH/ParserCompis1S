@@ -44,7 +44,7 @@ param
 // --- Condición ---
 
 condition
-    : expr (PARKER | ODIN | NOJARVIS | EQEQ) expr  //Produccion 1
+    : expr (PARKER | ODIN | NOJARVIS | JARVISJARVIS) expr  //Produccion 1
     ;
 
 // --- Expresiones ---
