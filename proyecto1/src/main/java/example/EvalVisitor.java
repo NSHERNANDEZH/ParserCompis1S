@@ -1,15 +1,17 @@
 package example;
 
-import java.util.ArrayList;
-import java.util.List;
 import antlr.AvengerBaseVisitor;
 import antlr.AvengerParser;
 import antlr.AvengerParser.ProgContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EvalVisitor extends AvengerBaseVisitor<String> {
 
     // ── Salidas ───────────────────────────────────────────────────────────────
     private final StringBuilder javaCode = new StringBuilder();
+    // ... resto de tu código ...
     private final List<Variable> symbolTable = new ArrayList<>();
     private int indentLevel = 0;
     private String currentScope = "global";
@@ -194,6 +196,145 @@ public class EvalVisitor extends AvengerBaseVisitor<String> {
         indentLevel--;
         currentScope = outerScope;
         javaCode.append(indent()).append("}\n");
+        return null;
+    }
+    // =========================================================================
+    // Produccion 5: FURY LPAREN tipoVar IDENTIFICADOR JARVIS expr SEMI
+    //               condition SEMI
+    //               IDENTIFICADOR JARVIS expr
+    //               RPAREN LBRACE statement* RBRACE   #StmtFor
+    // =========================================================================
+    @Override
+    public String visitStmtFor(AvengerParser.StmtForContext ctx) {
+        String javaType  = mapType(ctx.tipoVar().getText());
+        String initVar   = ctx.IDENTIFICADOR(0).getText(); // variable del ciclo
+        String initVal   = visit(ctx.expr(0));             // valor inicial
+        String condition = visit(ctx.condition());
+        String updateVar = ctx.IDENTIFICADOR(1).getText(); // variable de actualización
+        String updateVal = visit(ctx.expr(1));             // valor de actualización
+
+        javaCode.append(indent())
+                .append("for (")
+                .append(javaType).append(" ").append(initVar).append(" = ").append(initVal).append("; ")
+                .append(condition).append("; ")
+                .append(updateVar).append(" = ").append(updateVal)
+                .append(") {\n");
+
+        String outerScope = currentScope;
+        currentScope = currentScope + ".for";
+        indentLevel++;
+
+        for (AvengerParser.StatementContext s : ctx.statement()) {
+            visit(s);
+        }
+
+        indentLevel--;
+        currentScope = outerScope;
+        javaCode.append(indent()).append("}\n");
+        return null;
+    }
+
+    // =========================================================================
+    // Produccion 6: tipoVar IDENTIFICADOR LPAREN (param (COMMA param)*)? RPAREN
+    //               LBRACE statement* RBRACE   #StmtFuncDecl
+    // =========================================================================
+    @Override
+    public String visitStmtFuncDecl(AvengerParser.StmtFuncDeclContext ctx) {
+        String returnType = mapType(ctx.tipoVar().getText());
+        String funcName   = ctx.IDENTIFICADOR().getText();
+
+        javaCode.append("\n").append(indent())
+                .append("public static ").append(returnType).append(" ").append(funcName).append("(");
+
+        appendParams(ctx.param());
+
+        javaCode.append(") {\n");
+
+        String outerScope = currentScope;
+        currentScope = funcName;
+        indentLevel++;
+
+        for (AvengerParser.StatementContext s : ctx.statement()) {
+            visit(s);
+        }
+
+        indentLevel--;
+        currentScope = outerScope;
+        javaCode.append(indent()).append("}\n");
+        return null;
+    }
+
+    // =========================================================================
+    // Produccion 7: BOB IDENTIFICADOR LPAREN (param (COMMA param)*)? RPAREN
+    //               LBRACE statement* RBRACE   #StmtFuncDeclVoid
+    // =========================================================================
+    @Override
+    public String visitStmtFuncDeclVoid(AvengerParser.StmtFuncDeclVoidContext ctx) {
+        String funcName = ctx.IDENTIFICADOR().getText();
+
+        javaCode.append("\n").append(indent())
+                .append("public static void ").append(funcName).append("(");
+
+        appendParams(ctx.param());
+
+        javaCode.append(") {\n");
+
+        String outerScope = currentScope;
+        currentScope = funcName;
+        indentLevel++;
+
+        for (AvengerParser.StatementContext s : ctx.statement()) {
+            visit(s);
+        }
+
+        indentLevel--;
+        currentScope = outerScope;
+        javaCode.append(indent()).append("}\n");
+        return null;
+    }
+
+    // =========================================================================
+    // Produccion 8: RETURN expr SEMI   #StmtReturn
+    // =========================================================================
+    @Override
+    public String visitStmtReturn(AvengerParser.StmtReturnContext ctx) {
+        String value = visit(ctx.expr());
+        javaCode.append(indent()).append("return ").append(value).append(";\n");
+        return null;
+    }
+
+    // =========================================================================
+    // Produccion 9: GAMORA LPAREN IDENTIFICADOR RPAREN SEMI   #StmtRead
+    // =========================================================================
+    @Override
+    public String visitStmtRead(AvengerParser.StmtReadContext ctx) {
+        String name = ctx.IDENTIFICADOR().getText();
+        String scannerMethod = "scanner.next()"; // Valor por defecto seguro
+
+        // Buscamos la variable usando la misma lógica de compatibilidad que usó Samuel
+        java.util.Optional<Variable> existing = symbolTable.stream()
+                .filter(v -> v.getName().equals(name))
+                .findFirst();
+
+        if (existing.isPresent()) {
+            switch (existing.get().getType()) {
+                case "int":
+                    scannerMethod = "scanner.nextInt()";
+                    break;
+                case "double":
+                    scannerMethod = "scanner.nextDouble()";
+                    break;
+                case "boolean":
+                    scannerMethod = "scanner.nextBoolean()";
+                    break;
+                default:
+                    scannerMethod = "scanner.next()";
+                    break;
+            }
+        }
+
+        javaCode.append(indent())
+                .append(name).append(" = ").append(scannerMethod).append(";\n");
         return null;
     }
 }
