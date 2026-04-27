@@ -1,7 +1,31 @@
-stark edad jarvis 0;
-read(edad);
-vision(edad odin 18) {
-    write("Sos mayor de edad");
+// Prueba de tabla de símbolos con distintos scopes
+
+stark x jarvis 10;
+banner temperatura jarvis 36.6;
+rogers nombre jarvis "Tony";
+thor activo jarvis TRUE;
+
+stark suma(stark a, stark b) {
+    stark resultado jarvis a + b;
+    return resultado;
+}
+
+bob saludar(rogers msg) {
+    stark contador jarvis 0;
+    nebula(msg);
+}
+
+fury(stark i jarvis 0; i < 5; i jarvis i + 1) {
+    stark doble jarvis i * 2;
+}
+
+vision(x > 0) {
+    stark positivo jarvis x * 10;
 } wanda {
-    write("Sos menor de edad");
+    stark negativo jarvis x * -1;
+}
+
+loki(activo == TRUE) {
+    stark ciclo jarvis 1;
+    activo jarvis FALSE;
 }

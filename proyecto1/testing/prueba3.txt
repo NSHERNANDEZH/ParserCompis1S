@@ -8,10 +8,10 @@ stark numero jarvis 0;
 nebula("Ingrese un numero: ");
 gamora(numero);
 
-vision (numero odin 0) {
+vision (numero > 0) {
     nebula("El numero es positivo");
 } wanda {
-    vision (numero parker 0) {
+    vision (numero < 0) {
         nebula("El numero es negativo");
     } wanda {
         nebula("El numero es cero");

@@ -1,0 +1,14 @@
+// prueba_assemble.avng
+// Archivo principal que ensambla un módulo externo
+
+assemble "proyecto1/testing/matematica.avng";
+
+stark x jarvis 10;
+stark y jarvis 5;
+
+nebula(sumar(x, y));
+nebula(restar(x, y));
+nebula(multiplicar(x, y));
+
+stark resultado jarvis sumar(x, y);
+nebula(resultado);

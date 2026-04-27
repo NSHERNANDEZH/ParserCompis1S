@@ -1,24 +1,47 @@
 package example;
-
-import antlr.AvengerBaseVisitor;
-import antlr.AvengerParser;
-import antlr.AvengerParser.ProgContext;
-
-import java.util.ArrayList;
+import org.antlr.v4.runtime.*;
+import antlr.*;
+import java.util.*;
 import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+//Recorre el árbol de análisis sintáctico y:
+//1. Construye una cadena de código Java (traducción).
+//2. Registra cada variable declarada en la tabla de símbolos (List<Variable>).
 
 public class EvalVisitor extends AvengerBaseVisitor<String> {
 
     // ── Salidas ───────────────────────────────────────────────────────────────
     private final StringBuilder javaCode = new StringBuilder();
-    // ... resto de tu código ...
-    private final List<Variable> symbolTable = new ArrayList<>();
+    private List<Variable> symbolTable = new ArrayList<>();
+    private Set<String> archivosEnsamblados = new HashSet<>();
     private int indentLevel = 0;
     private String currentScope = "global";
-
+    private final boolean esHijo;
     // ── Accesores públicos ────────────────────────────────────────────────────
     public String getJavaCode()            { return javaCode.toString(); }
     public List<Variable> getSymbolTable() { return symbolTable; }
+    // ── Constructores ────────────────────────────────────────────────────────────
+    //Constructor principal — usado al visitar el archivo raíz.
+    public EvalVisitor() {
+        this.symbolTable          = new ArrayList<>();
+        this.archivosEnsamblados  = new HashSet<>();
+        this.esHijo               = false;
+    }
+
+    //Constructor hijo — usado al ensamblar un archivo externo.
+    //Comparte tabla de símbolos y conjunto de ensamblados con el padre
+    //para que las variables y funciones del archivo externo sean visibles
+    //en el scope del archivo que lo ensambló.
+    public EvalVisitor(List<Variable> symbolTable, Set<String> archivosEnsamblados, int indentLevel, String currentScope) {
+        this.symbolTable         = symbolTable;
+        this.archivosEnsamblados = archivosEnsamblados;
+        this.indentLevel         = indentLevel;
+        this.currentScope        = currentScope;
+        this.esHijo              = true;
+    }
 
     // ── Utilidades ────────────────────────────────────────────────────────────
     private String indent() {
@@ -55,13 +78,10 @@ public class EvalVisitor extends AvengerBaseVisitor<String> {
     }
 
     // =========================================================================
-    // PRODUCCIONES — pegar aquí los métodos @Override de cada integrante
-    // =========================================================================
-    // =========================================================================
     // prog : statement* EOF
     // =========================================================================
     @Override
-    public String visitProg(ProgContext ctx) {
+    public String visitProg(AvengerParser.ProgContext ctx) {
         javaCode.append("import java.util.Scanner;\n\n"); //Se puede omitir
         javaCode.append("public class Traduccion {\n");
         indentLevel++;
@@ -82,7 +102,9 @@ public class EvalVisitor extends AvengerBaseVisitor<String> {
     // alternativas de statement
     // =========================================================================
 
+    // =========================================================================
     // Produccion 1: tipoVar IDENTIFICADOR JARVIS expr SEMI   #StmtVarDecl
+    // =========================================================================
     @Override
     public String visitStmtVarDecl(AvengerParser.StmtVarDeclContext ctx) {
         String javaType = mapType(ctx.tipoVar().getText());
@@ -97,8 +119,9 @@ public class EvalVisitor extends AvengerBaseVisitor<String> {
         symbolTable.add(new Variable(name, value, javaType, currentScope));
         return null;
     }
-
+    // =========================================================================
     // Produccion 2: IDENTIFICADOR JARVIS expr SEMI   #StmtAssign
+    // =========================================================================
     @Override
     public String visitStmtAssign(AvengerParser.StmtAssignContext ctx) {
         String name  = ctx.IDENTIFICADOR().getText();
@@ -177,8 +200,9 @@ public class EvalVisitor extends AvengerBaseVisitor<String> {
         javaCode.append(indent()).append("}\n");
         return null;
     }
-
+    // =========================================================================
     // Produccion 4: LOKI LPAREN condition RPAREN LBRACE statement* RBRACE   #StmtWhile
+    // =========================================================================
     @Override
     public String visitStmtWhile(AvengerParser.StmtWhileContext ctx) {
         String condition = visit(ctx.condition());
@@ -336,5 +360,228 @@ public class EvalVisitor extends AvengerBaseVisitor<String> {
         javaCode.append(indent())
                 .append(name).append(" = ").append(scannerMethod).append(";\n");
         return null;
+    }
+    // =========================================================================
+    // Produccion 10: NEBULA LPAREN expr RPAREN SEMI   #StmtWrite
+    // =========================================================================
+    @Override
+    public String visitStmtWrite(AvengerParser.StmtWriteContext ctx) {
+        String value = visit(ctx.expr());
+        javaCode.append(indent())
+                .append("System.out.println(").append(value).append(");\n");
+        return null;
+    }
+    // =========================================================================
+    // Produccion 11: RECRUIT STRING_ROGERS SEMI   #StmtImport
+    // =========================================================================
+    @Override
+    public String visitStmtImport(AvengerParser.StmtImportContext ctx) {
+        // STRING_ROGERS incluye comillas — se eliminan para obtener la ruta del import
+        String raw        = ctx.STRING_ROGERS().getText();
+        String importPath = raw.substring(1, raw.length() - 1);
+        // Los imports van al inicio — se insertan antes del contenido existente
+        javaCode.insert(0, "import " + importPath + ";\n");
+        return null;
+    }
+    // =========================================================================
+    // Produccion 12: ASSEMBLE STRING_ROGERS SEMI   #StmtAssemble
+    // =========================================================================
+    @Override
+    public String visitStmtAssemble(AvengerParser.StmtAssembleContext ctx) {
+        // STRING_ROGERS incluye comillas — se eliminan para obtener la ruta del archivo
+        String raw  = ctx.STRING_ROGERS().getText();
+        String ruta = raw.substring(1, raw.length() - 1);
+
+        // Normalizar la ruta para evitar duplicados por rutas equivalentes (ej: ./a.avng vs a.avng)
+        String rutaNormalizada;
+        try {
+            rutaNormalizada = Paths.get(ruta).toRealPath().toString();
+        } catch (IOException e) {
+            // Si el archivo no existe, toRealPath falla — usamos la ruta absoluta para el mensaje de error
+            rutaNormalizada = Paths.get(ruta).toAbsolutePath().toString();
+        }
+
+        // Verificar si este archivo ya fue ensamblado para evitar ciclos o duplicados
+        if (archivosEnsamblados.contains(rutaNormalizada)) {
+            javaCode.append(indent())
+                    .append("// assemble \"").append(ruta).append("\" — ya ensamblado, se omite\n");
+            return null;
+        }
+
+        // Marcar el archivo como ensamblado antes de procesarlo (previene ciclos A→B→A)
+        archivosEnsamblados.add(rutaNormalizada);
+
+        // Leer el contenido del archivo externo
+        String contenido;
+        try {
+            contenido = new String(Files.readAllBytes(Paths.get(ruta)));
+        } catch (IOException e) {
+            System.err.println("  [ASSEMBLE] Error: no se pudo leer el archivo \"" + ruta + "\"");
+            javaCode.append(indent())
+                    .append("// assemble \"").append(ruta).append("\" — archivo no encontrado\n");
+            return null;
+        }
+
+        // Parsear el archivo externo con el mismo lexer y parser
+        AvengerLexer  lexerExterno  = new AvengerLexer(CharStreams.fromString(contenido));
+        AvengerParser parserExterno = new AvengerParser(new CommonTokenStream(lexerExterno));
+        AvengerParser.ProgContext arbolExterno = parserExterno.prog();
+
+        // Crear un visitor hijo que comparte la tabla de símbolos y el conjunto de ensamblados
+        // para que las variables del archivo externo sean visibles en el scope actual
+        EvalVisitor visitorHijo = new EvalVisitor(symbolTable, archivosEnsamblados, indentLevel, currentScope);
+        visitorHijo.visitProg(arbolExterno);
+
+        // Insertar el código del archivo externo en el punto donde se usó assemble
+        javaCode.append(indent())
+                .append("// --- inicio: ").append(ruta).append(" ---\n");
+        javaCode.append(visitorHijo.getJavaCode());
+        javaCode.append(indent())
+                .append("// --- fin: ").append(ruta).append(" ---\n");
+
+        System.out.println("  [ASSEMBLE] Ensamblado: \"" + ruta + "\"");
+        return null;
+    }
+    // =========================================================================
+    // Produccion 13: IDENTIFICADOR LPAREN (expr (COMMA expr)*)? RPAREN SEMI   #StmtFuncCall
+    // =========================================================================
+    @Override
+    public String visitStmtFuncCall(AvengerParser.StmtFuncCallContext ctx) {
+        String call = buildFuncCall(ctx.IDENTIFICADOR().getText(), ctx.expr());
+        javaCode.append(indent()).append(call).append(";\n");
+        return null;
+    }
+
+    // =========================================================================
+    // tipoVar : STARK | BANNER | ROGERS | THOR   #TipoVar
+    // =========================================================================
+    @Override
+    public String visitTipoVar(AvengerParser.TipoVarContext ctx) {
+        return mapType(ctx.getText());
+    }
+
+    // =========================================================================
+    // param : tipoVar IDENTIFICADOR
+    // =========================================================================
+    @Override
+    public String visitParam(AvengerParser.ParamContext ctx) {
+        String javaType = mapType(ctx.tipoVar().getText());
+        String name     = ctx.IDENTIFICADOR().getText();
+        return javaType + " " + name;
+    }
+
+    // =========================================================================
+    // condition : expr (PARKER | ODIN | NOJARVIS | EQEQ) expr
+    // =========================================================================
+    @Override
+    public String visitCondition(AvengerParser.ConditionContext ctx) {
+        String left  = visit(ctx.expr(0));
+        String op    = ctx.getChild(1).getText(); // el operador es el segundo hijo
+        String right = visit(ctx.expr(1));
+        return left + " " + op + " " + right;
+    }
+
+    // =========================================================================
+    // alternativas de expr
+    // =========================================================================
+
+    // =========================================================================
+    // Produccion 1: expr (MULT | DIV) expr   #ExprMulDiv
+    // =========================================================================
+    @Override
+    public String visitExprMulDiv(AvengerParser.ExprMulDivContext ctx) {
+        String left  = visit(ctx.expr(0));
+        String op    = ctx.getChild(1).getText();
+        String right = visit(ctx.expr(1));
+        return left + " " + op + " " + right;
+    }
+
+    // =========================================================================
+    // Produccion 2: expr (PLUS | MINUS) expr   #ExprSumResta
+    // =========================================================================
+    @Override
+    public String visitExprSumResta(AvengerParser.ExprSumRestaContext ctx) {
+        String left  = visit(ctx.expr(0));
+        String op    = ctx.getChild(1).getText();
+        String right = visit(ctx.expr(1));
+        return left + " " + op + " " + right;
+    }
+
+    // =========================================================================
+    // Produccion 3: primary   #ExprPrimary
+    // =========================================================================
+    @Override
+    public String visitExprPrimary(AvengerParser.ExprPrimaryContext ctx) {
+        return visit(ctx.primary());
+    }
+
+    // =========================================================================
+    // alternativas de primary
+    // =========================================================================
+
+    // =========================================================================
+    // Produccion 1: MINUS primary   #PrimaryNegativo
+    // =========================================================================
+    @Override
+    public String visitPrimaryNegativo(AvengerParser.PrimaryNegativoContext ctx) {
+        return "-" + visit(ctx.primary());
+    }
+
+    // =========================================================================
+    // Produccion 2: LPAREN expr RPAREN   #PrimaryAgrupado
+    // =========================================================================
+    @Override
+    public String visitPrimaryAgrupado(AvengerParser.PrimaryAgrupadoContext ctx) {
+        return "(" + visit(ctx.expr()) + ")";
+    }
+
+    // =========================================================================
+    // Produccion 3: IDENTIFICADOR LPAREN (expr (COMMA expr)*)? RPAREN   #PrimaryFuncCall
+    // =========================================================================
+    @Override
+    public String visitPrimaryFuncCall(AvengerParser.PrimaryFuncCallContext ctx) {
+        return buildFuncCall(ctx.IDENTIFICADOR().getText(), ctx.expr());
+    }
+
+    // =========================================================================
+    // Produccion 4: IDENTIFICADOR   #PrimaryId
+    // =========================================================================
+    @Override
+    public String visitPrimaryId(AvengerParser.PrimaryIdContext ctx) {
+        return ctx.IDENTIFICADOR().getText();
+    }
+
+    // =========================================================================
+    // Produccion 5: NUMERO_STARK   #PrimaryEntero
+    // =========================================================================
+    @Override
+    public String visitPrimaryEntero(AvengerParser.PrimaryEnteroContext ctx) {
+        return ctx.NUMERO_STARK().getText();
+    }
+
+    // =========================================================================
+    // Produccion 6: NUMERO_BANNER   #PrimaryFlotante
+    // =========================================================================
+    @Override
+    public String visitPrimaryFlotante(AvengerParser.PrimaryFlotanteContext ctx) {
+        return ctx.NUMERO_BANNER().getText();
+    }
+
+    // =========================================================================
+    // Produccion 7: STRING_ROGERS   #PrimaryCadena
+    // =========================================================================
+    @Override
+    public String visitPrimaryCadena(AvengerParser.PrimaryCadenaContext ctx) {
+        // STRING_ROGERS ya incluye las comillas — es un literal String válido en Java
+        return ctx.STRING_ROGERS().getText();
+    }
+
+    // =========================================================================
+    // Produccion 8: BOOL_THOR   #PrimaryBooleano
+    // =========================================================================
+    @Override
+    public String visitPrimaryBooleano(AvengerParser.PrimaryBooleanoContext ctx) {
+        // Avenger: TRUE/FALSE → Java: true/false (minúsculas)
+        return ctx.BOOL_THOR().getText().toLowerCase();
     }
 }

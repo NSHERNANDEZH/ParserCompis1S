@@ -2,8 +2,6 @@
 // Lenguaje: Avenger
 // Descripcion: Declara dos enteros, los suma y muestra el resultado
 
-stark a jarvis 10;
-stark b jarvis 5;
 stark resultado jarvis a + b;
 
 nebula("Suma: ");

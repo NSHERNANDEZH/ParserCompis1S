@@ -1,0 +1,17 @@
+// Módulo de funciones matemáticas básicas (Sub-archivo para prueba7.txt)
+
+stark sumar(stark a, stark b) {
+    return a + b;
+}
+
+stark restar(stark a, stark b) {
+    return a - b;
+}
+
+stark multiplicar(stark a, stark b) {
+    return a * b;
+}
+
+stark dividir(stark a, stark b) {
+    return a / b;
+}

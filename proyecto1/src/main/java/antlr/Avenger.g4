@@ -28,7 +28,8 @@ statement
     | GAMORA LPAREN IDENTIFICADOR RPAREN SEMI                       # StmtRead         //Produccion 9
     | NEBULA LPAREN expr RPAREN SEMI                                # StmtWrite        //Produccion 10
     | RECRUIT STRING_ROGERS SEMI                                    # StmtImport       //Produccion 11
-    | IDENTIFICADOR LPAREN (expr (COMMA expr)*)? RPAREN SEMI        # StmtFuncCall     //Produccion 12
+    | ASSEMBLE STRING_ROGERS SEMI                                   # StmtAssemble     //Produccion 12
+    | IDENTIFICADOR LPAREN (expr (COMMA expr)*)? RPAREN SEMI        # StmtFuncCall     //Produccion 13
     ;
 
 // --- Tipos ---
@@ -89,6 +90,7 @@ FURY    : 'fury'    ;
 GAMORA  : 'gamora'  ;
 NEBULA  : 'nebula'  ;
 RECRUIT : 'recruit' ;
+ASSEMBLE: 'assemble';  // importa otro archivo Avenger: assemble "utils/helpers.avng";
 
 // ----- Otras palabras clave -----
 RETURN  : 'return'  ;
