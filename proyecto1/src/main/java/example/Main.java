@@ -66,18 +66,34 @@ public class Main {
         printTokenTable(tokens, lexer);
         printSummary(tokens, errorListener.getErrorCount());
 
+        // ── Si hay errores léxicos, no continuar ──────────────────────────
+        if (errorListener.getErrorCount() > 0) {
+            printError("Traduccion cancelada: Se deben corregir los errores lexicos antes de continuar.");
+            return;
+        }
+
+        // ── Análisis sintáctico ───────────────────────────────────────────
         AvengerParser parser = new AvengerParser(tokenStream);
 
-        ParseTree tree =  parser.prog();
+        ParserErrorListener parserErrorListener = new ParserErrorListener();
+        parser.removeErrorListeners();
+        parser.addErrorListener(parserErrorListener);
 
-        //Mostrar traduccion a codigo JAVA
+        ParseTree tree = parser.prog();
+
+        // ── Si hay errores sintácticos, no continuar ──────────────────────
+        if (parserErrorListener.getErrorCount() > 0) {
+            System.out.println();
+            printError("Traduccion cancelada: Se deben corregir los errores sintácticos antes de continuar.");
+            return;
+        }
+
+        // ── Traducción a Java ─────────────────────────────────────────────
         EvalVisitor evalVisitor = new EvalVisitor();
         evalVisitor.visit(tree);
 
-        // Después de evalVisitor.visit(tree);
         System.out.println(GREEN + BOLD + "\n  ── CÓDIGO JAVA GENERADO ──\n" + RESET);
         System.out.println(evalVisitor.getJavaCode());
-
     }
 
     private static void printTokenTable(List<Token> tokens, AvengerLexer lexer) {

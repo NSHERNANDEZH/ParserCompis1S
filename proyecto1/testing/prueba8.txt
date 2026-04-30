@@ -1,0 +1,6 @@
+// Prueba negativa con un fallo léxico.
+stark x jarvis 5;
+stark y jarvis 10;
+stark z jarvis x + y;
+nebula(z);
+stark w jarvis x @ y;

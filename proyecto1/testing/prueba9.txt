@@ -1,0 +1,6 @@
+// Prueba negativa con un fallo de sintáxis
+stark x jarvis 5;
+vision (x > 3) {
+    nebula(x);
+stark y jarvis 2;
+nebula(y);
