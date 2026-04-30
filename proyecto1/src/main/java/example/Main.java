@@ -25,7 +25,6 @@ public class Main {
     public static void main(String[] args) {
 
         printBanner();
-
         String rutaArchivo;
 
         if (args.length >= 1) {
@@ -79,10 +78,6 @@ public class Main {
         System.out.println(GREEN + BOLD + "\n  ── CÓDIGO JAVA GENERADO ──\n" + RESET);
         System.out.println(evalVisitor.getJavaCode());
 
-        System.out.println(CYAN + BOLD + "\n  ── TABLA DE SÍMBOLOS ──\n" + RESET);
-        for (Variable v : evalVisitor.getSymbolTable()) {
-            System.out.println("  " + v);
-        }
     }
 
     private static void printTokenTable(List<Token> tokens, AvengerLexer lexer) {
