@@ -2,5 +2,7 @@
 stark x jarvis 5;
 vision (x > 3) {
     nebula(x);
+} wanda
 stark y jarvis 2;
 nebula(y);
+

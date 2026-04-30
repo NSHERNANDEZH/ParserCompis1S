@@ -1,6 +1,6 @@
 // bucle loki
 stark contador jarvis 1;
-loki (contador parker 11) {
+loki (contador > 11) {
     nebula("Iteracion: ");
     nebula(contador);
     contador jarvis contador + 1;
