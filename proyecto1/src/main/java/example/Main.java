@@ -88,12 +88,36 @@ public class Main {
             return;
         }
 
-        // ── Traducción a Java ─────────────────────────────────────────────
+        // ── Análisis semántico ────────────────────────────────────────────
+        SemanticVisitor semanticVisitor = new SemanticVisitor();
+        semanticVisitor.visit(tree);
+
+        if (semanticVisitor.hasErrors()) {
+            System.out.println();
+            semanticVisitor.getSemanticErrors().forEach(e ->
+                    System.out.println(RED + BOLD + "   " + e + RESET));
+            printError("Traducción cancelada: errores semánticos detectados.");
+            return;
+        }
+
+// ── Traducción a Java ─────────────────────────────────────────────
         EvalVisitor evalVisitor = new EvalVisitor();
         evalVisitor.visit(tree);
 
+// Guardar el archivo .java generado
+        String javaContent = evalVisitor.getJavaCode();
+        String outputPath  = "proyecto1/testing/Traduccion.java";
+        try {
+            java.nio.file.Files.createDirectories(java.nio.file.Paths.get("output"));
+            java.nio.file.Files.write(java.nio.file.Paths.get(outputPath),
+                    javaContent.getBytes());
+            System.out.println(GREEN + BOLD + "\n  ✔ Archivo generado: " + outputPath + RESET);
+        } catch (IOException ioEx) {
+            printError("No se pudo escribir el archivo .java: " + ioEx.getMessage());
+        }
+
         System.out.println(GREEN + BOLD + "\n  ── CÓDIGO JAVA GENERADO ──\n" + RESET);
-        System.out.println(evalVisitor.getJavaCode());
+        System.out.println(javaContent);
     }
 
     private static void printTokenTable(List<Token> tokens, AvengerLexer lexer) {

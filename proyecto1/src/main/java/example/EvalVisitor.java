@@ -14,6 +14,8 @@ import java.nio.file.Paths;
 public class EvalVisitor extends AvengerBaseVisitor<String> {
 
     // ── Salidas ───────────────────────────────────────────────────────────────
+    private final StringBuilder importBuffer = new StringBuilder();
+    private final StringBuilder externalFunctions = new StringBuilder();
     private final StringBuilder javaCode = new StringBuilder();
     private List<Variable> symbolTable = new ArrayList<>();
     private Set<String> archivosEnsamblados = new HashSet<>();
@@ -82,20 +84,60 @@ public class EvalVisitor extends AvengerBaseVisitor<String> {
     // =========================================================================
     @Override
     public String visitProg(AvengerParser.ProgContext ctx) {
-        javaCode.append("import java.util.Scanner;\n\n"); //Se puede omitir
+        if (esHijo) {
+            visitChildren(ctx);
+            return null;
+        }
+
+        boolean necesitaScanner = contieneRead(ctx);
+
+        List<AvengerParser.StatementContext> funciones = new ArrayList<>();
+        List<AvengerParser.StatementContext> resto      = new ArrayList<>();
+
+        for (AvengerParser.StatementContext s : ctx.statement()) {
+            if (s instanceof AvengerParser.StmtFuncDeclContext ||
+                    s instanceof AvengerParser.StmtFuncDeclVoidContext) {
+                funciones.add(s);
+            } else {
+                resto.add(s);
+            }
+        }
+
+        // Imports acumulados por recruit + Scanner si hace falta
+        if (necesitaScanner) importBuffer.append("import java.util.Scanner;\n");
+        if (importBuffer.length() > 0) {
+            javaCode.append(importBuffer).append("\n");
+        }
+
         javaCode.append("public class Traduccion {\n");
         indentLevel++;
+
         javaCode.append(indent()).append("public static void main(String[] args) {\n");
         indentLevel++;
-        javaCode.append(indent()).append("Scanner scanner = new Scanner(System.in);\n\n");
-
-        visitChildren(ctx);
-
+        if (necesitaScanner) {
+            javaCode.append(indent()).append("Scanner scanner = new Scanner(System.in);\n\n");
+        }
+        for (AvengerParser.StatementContext s : resto) visit(s);
         indentLevel--;
         javaCode.append(indent()).append("}\n");
+
+        for (AvengerParser.StatementContext s : funciones) visit(s);
+
+        if (externalFunctions.length() > 0) {
+            javaCode.append(externalFunctions);
+        }
+
         indentLevel--;
         javaCode.append("}\n");
         return null;
+    }
+
+    private boolean contieneRead(org.antlr.v4.runtime.tree.ParseTree tree) {
+        if (tree instanceof AvengerParser.StmtReadContext) return true;
+        for (int i = 0; i < tree.getChildCount(); i++) {
+            if (contieneRead(tree.getChild(i))) return true;
+        }
+        return false;
     }
 
     // =========================================================================
@@ -269,25 +311,19 @@ public class EvalVisitor extends AvengerBaseVisitor<String> {
 
         javaCode.append("\n").append(indent())
                 .append("public static ").append(returnType).append(" ").append(funcName).append("(");
-
         appendParams(ctx.param());
-
         javaCode.append(") {\n");
 
         String outerScope = currentScope;
         currentScope = funcName;
         indentLevel++;
-
-        for (AvengerParser.StatementContext s : ctx.statement()) {
-            visit(s);
-        }
-
+        for (AvengerParser.StatementContext s : ctx.statement()) visit(s);
         indentLevel--;
         currentScope = outerScope;
+
         javaCode.append(indent()).append("}\n");
         return null;
     }
-
     // =========================================================================
     // Produccion 7: BOB IDENTIFICADOR LPAREN (param (COMMA param)*)? RPAREN
     //               LBRACE statement* RBRACE   #StmtFuncDeclVoid
@@ -298,25 +334,19 @@ public class EvalVisitor extends AvengerBaseVisitor<String> {
 
         javaCode.append("\n").append(indent())
                 .append("public static void ").append(funcName).append("(");
-
         appendParams(ctx.param());
-
         javaCode.append(") {\n");
 
         String outerScope = currentScope;
         currentScope = funcName;
         indentLevel++;
-
-        for (AvengerParser.StatementContext s : ctx.statement()) {
-            visit(s);
-        }
-
+        for (AvengerParser.StatementContext s : ctx.statement()) visit(s);
         indentLevel--;
         currentScope = outerScope;
+
         javaCode.append(indent()).append("}\n");
         return null;
     }
-
     // =========================================================================
     // Produccion 8: RETURN expr SEMI   #StmtReturn
     // =========================================================================
@@ -376,11 +406,14 @@ public class EvalVisitor extends AvengerBaseVisitor<String> {
     // =========================================================================
     @Override
     public String visitStmtImport(AvengerParser.StmtImportContext ctx) {
-        // STRING_ROGERS incluye comillas — se eliminan para obtener la ruta del import
         String raw        = ctx.STRING_ROGERS().getText();
         String importPath = raw.substring(1, raw.length() - 1);
-        // Los imports van al inicio — se insertan antes del contenido existente
-        javaCode.insert(0, "import " + importPath + ";\n");
+        String importLine = "import " + importPath + ";\n";
+
+        // Evitar duplicados
+        if (importBuffer.indexOf(importLine) < 0) {
+            importBuffer.append(importLine);
+        }
         return null;
     }
     // =========================================================================
@@ -388,56 +421,55 @@ public class EvalVisitor extends AvengerBaseVisitor<String> {
     // =========================================================================
     @Override
     public String visitStmtAssemble(AvengerParser.StmtAssembleContext ctx) {
-        // STRING_ROGERS incluye comillas — se eliminan para obtener la ruta del archivo
         String raw  = ctx.STRING_ROGERS().getText();
         String ruta = raw.substring(1, raw.length() - 1);
 
-        // Normalizar la ruta para evitar duplicados por rutas equivalentes (ej: ./a.avng vs a.avng)
         String rutaNormalizada;
         try {
-            rutaNormalizada = Paths.get(ruta).toRealPath().toString();
+            rutaNormalizada = java.nio.file.Paths.get(ruta).toRealPath().toString();
         } catch (IOException e) {
-            // Si el archivo no existe, toRealPath falla — usamos la ruta absoluta para el mensaje de error
-            rutaNormalizada = Paths.get(ruta).toAbsolutePath().toString();
+            rutaNormalizada = java.nio.file.Paths.get(ruta).toAbsolutePath().toString();
         }
 
-        // Verificar si este archivo ya fue ensamblado para evitar ciclos o duplicados
-        if (archivosEnsamblados.contains(rutaNormalizada)) {
-            javaCode.append(indent())
-                    .append("// assemble \"").append(ruta).append("\" — ya ensamblado, se omite\n");
-            return null;
-        }
-
-        // Marcar el archivo como ensamblado antes de procesarlo (previene ciclos A→B→A)
+        if (archivosEnsamblados.contains(rutaNormalizada)) return null;
         archivosEnsamblados.add(rutaNormalizada);
 
-        // Leer el contenido del archivo externo
         String contenido;
         try {
-            contenido = new String(Files.readAllBytes(Paths.get(ruta)));
+            contenido = new String(Files.readAllBytes(java.nio.file.Paths.get(ruta)));
         } catch (IOException e) {
-            System.err.println("  [ASSEMBLE] Error: no se pudo leer el archivo \"" + ruta + "\"");
-            javaCode.append(indent())
-                    .append("// assemble \"").append(ruta).append("\" — archivo no encontrado\n");
+            System.err.println("  [ASSEMBLE] Error: no se pudo leer \"" + ruta + "\"");
             return null;
         }
 
-        // Parsear el archivo externo con el mismo lexer y parser
         AvengerLexer  lexerExterno  = new AvengerLexer(CharStreams.fromString(contenido));
         AvengerParser parserExterno = new AvengerParser(new CommonTokenStream(lexerExterno));
         AvengerParser.ProgContext arbolExterno = parserExterno.prog();
 
-        // Crear un visitor hijo que comparte la tabla de símbolos y el conjunto de ensamblados
-        // para que las variables del archivo externo sean visibles en el scope actual
-        EvalVisitor visitorHijo = new EvalVisitor(symbolTable, archivosEnsamblados, indentLevel, currentScope);
-        visitorHijo.visitProg(arbolExterno);
+        // Separar funciones de statements normales
+        List<AvengerParser.StatementContext> funcionesExternas = new ArrayList<>();
+        List<AvengerParser.StatementContext> restoExterno      = new ArrayList<>();
 
-        // Insertar el código del archivo externo en el punto donde se usó assemble
-        javaCode.append(indent())
-                .append("// --- inicio: ").append(ruta).append(" ---\n");
-        javaCode.append(visitorHijo.getJavaCode());
-        javaCode.append(indent())
-                .append("// --- fin: ").append(ruta).append(" ---\n");
+        for (AvengerParser.StatementContext s : arbolExterno.statement()) {
+            if (s instanceof AvengerParser.StmtFuncDeclContext ||
+                    s instanceof AvengerParser.StmtFuncDeclVoidContext) {
+                funcionesExternas.add(s);
+            } else {
+                restoExterno.add(s);
+            }
+        }
+
+        // Statements normales van inline donde está el assemble (dentro del main)
+        String outerScope = currentScope;
+        for (AvengerParser.StatementContext s : restoExterno) visit(s);
+        currentScope = outerScope;
+
+        // Funciones: visitor temporal con indentLevel=1 (nivel de clase, fuera del main)
+        EvalVisitor funcVisitor = new EvalVisitor(symbolTable, archivosEnsamblados, 1, "global");
+        for (AvengerParser.StatementContext s : funcionesExternas) funcVisitor.visit(s);
+
+        // Acumular en el buffer de funciones externas — se pegan después del main en visitProg
+        externalFunctions.append(funcVisitor.getJavaCode());
 
         System.out.println("  [ASSEMBLE] Ensamblado: \"" + ruta + "\"");
         return null;
