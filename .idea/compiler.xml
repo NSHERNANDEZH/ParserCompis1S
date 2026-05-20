@@ -7,6 +7,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="lab01" />
+        <module name="avenger-ide" />
+        <module name="AnalisisLexico" />
       </profile>
     </annotationProcessing>
   </component>

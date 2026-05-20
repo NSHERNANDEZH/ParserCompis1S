@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ParserCompis1S.iml" filepath="$PROJECT_DIR$/.idea/ParserCompis1S.iml" />
       <module fileurl="file://$PROJECT_DIR$/proyecto1/lab01.iml" filepath="$PROJECT_DIR$/proyecto1/lab01.iml" />
     </modules>
   </component>
