@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AvengerScript IDE</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loading">
+    <div class="loading-box">
+        <div class="loading-icon">⬡</div>
+        <div class="loading-msg" id="loading-msg">Procesando...</div>
+    </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+    <div class="logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#ffd700" stroke-width="2"/>
+            <polygon points="12,4 15,10 22,10 16,14 18,21 12,17 6,21 8,14 2,10 9,10" fill="#e63946" opacity="0.9"/>
+        </svg>
+        <span>Avenger<span class="red">Script</span></span>
+        <span class="logo-sub" style="font-weight:400;color:var(--text-muted);font-size:0.85em">IDE</span>
+    </div>
+
+    <div class="sep"></div>
+
+    <select class="example-select" id="exampleSelect" title="Cargar ejemplo">
+        <option value="">Ejemplos</option>
+        <option value="hello">Hola Mundo</option>
+        <option value="arithmetic">Aritmética</option>
+        <option value="ifelse">If / Else</option>
+        <option value="nested">If anidado</option>
+        <option value="while">Ciclo While</option>
+        <option value="for">Ciclo For</option>
+        <option value="functions">Funciones</option>
+        <option value="void">Función Void</option>
+        <option value="input">Entrada (gamora)</option>
+    </select>
+
+    <div class="sep"></div>
+
+    <button class="btn btn-compile" id="btnCompile" onclick="doCompile()" title="Ctrl+Shift+B">
+        Compilar
+    </button>
+    <button class="btn btn-run" id="btnRun" onclick="doRun()" title="Ctrl+Enter">
+        ▶ Ejecutar
+    </button>
+    <button class="btn btn-download" id="btnDownload" onclick="doDownload()" disabled title="Descargar Traduccion.java">
+        ⬇ .java
+    </button>
+
+    <span class="status" id="statusBar">Listo — escribe código AvengerScript</span>
+</div>
+
+<!-- Contenido principal -->
+<div class="main">
+
+
+    <!-- Editores lado a lado -->
+    <div class="editors" id="editorsRow">
+        <!-- Izquierda: AvengerScript -->
+        <div class="editor-pane" id="paneAvenger">
+            <div class="pane-header">
+                <span class="badge badge-avenger">AVENGER</span>
+                código fuente
+                <span style="margin-left:auto;font-size:0.9em;color:var(--text-dim)" title="Ctrl+Enter para ejecutar">⌨ Ctrl+Enter</span>
+            </div>
+            <div class="editor-wrap" id="avengerEditorWrap"></div>
+        </div>
+
+        <div class="splitter splitter-v" id="splitterV"></div>
+
+        <!-- Derecha: Java generado -->
+        <div class="editor-pane" id="paneJava">
+            <div class="pane-header">
+                <span class="badge badge-java">JAVA</span>
+                código generado (solo lectura)
+            </div>
+            <div class="editor-wrap" id="javaEditorWrap"></div>
+        </div>
+    </div>
+
+    <div class="splitter splitter-h" id="splitterH"></div>
+
+    <!-- Consola inferior -->
+    <div class="console" id="consolePanel">
+        <div class="console-tabs">
+            <div class="ctab active" data-tab="output" onclick="switchTab(this,'output')">
+                Salida del programa
+            </div>
+            <div class="ctab" data-tab="errors" onclick="switchTab(this,'errors')">
+                Errores <span class="badge-count" id="errBadge" style="display:none">0</span>
+            </div>
+            <div class="ctab" data-tab="tokens" onclick="switchTab(this,'tokens')">
+                Tabla de Tokens
+            </div>
+        </div>
+        <div class="console-body">
+            <div class="cpanel active" id="panel-output">
+                <div class="terminal" id="terminal">
+                    <span class="out-dim">// Ejecuta el programa con ▶ Ejecutar para ver la salida aquí...</span>
+                </div>
+                <div class="terminal-input-row" id="terminalInputRow" style="display:none">
+                    <span class="terminal-prompt">▶</span>
+                    <input class="terminal-input" id="terminalInput" type="text"
+                           placeholder="Escribe y presiona Enter..." autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+            <div class="cpanel" id="panel-errors">
+                <span class="out-dim">// Sin errores todavía. Compila o ejecuta primero.</span>
+            </div>
+            <div class="cpanel" id="panel-tokens">
+                <span class="out-dim">// Compila para ver la tabla de tokens del análisis léxico.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monaco Editor CDN -->
+<script src="https://unpkg.com/monaco-editor@0.44.0/min/vs/loader.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

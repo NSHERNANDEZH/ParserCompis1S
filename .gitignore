@@ -1,0 +1,15 @@
+# Build output
+target/
+out/
+output/
+
+# IntelliJ IDEA
+*.iml
+.idea/
+
+# Maven wrapper cache
+.mvn/wrapper/maven-wrapper.jar
+
+# OS
+.DS_Store
+Thumbs.db
