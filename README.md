@@ -119,6 +119,8 @@ Si modificás la gramática (`Avenger.g4`):
 ./mvnw -f proyecto1/ide/pom.xml clean package -DskipTests
 java -jar proyecto1/ide/target/avenger-ide-1.0-SNAPSHOT.jar
 ```
+---
+**Más información en `docs/AvengerScript_Documentacion.pdf`**
 
 ---
 

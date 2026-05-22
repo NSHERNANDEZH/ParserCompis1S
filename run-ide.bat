@@ -35,8 +35,8 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
-echo  ============================================
 echo [2/2] Arrancando servidor...
+echo  ============================================
 echo  El navegador se abrira automaticamente.
 echo  Cierra esta ventana para apagar el servidor.
 echo  ============================================

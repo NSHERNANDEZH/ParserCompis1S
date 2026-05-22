@@ -5,9 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 
-import java.awt.Desktop;
-import java.net.URI;
-
 @SpringBootApplication
 public class IdeApplication {
 
@@ -17,9 +14,15 @@ public class IdeApplication {
 
     @EventListener(ApplicationReadyEvent.class)
     public void openBrowser() {
+        String os = System.getProperty("os.name", "").toLowerCase();
         try {
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().browse(new URI("http://localhost:8080"));
+            if (os.contains("win")) {
+                // Works reliably from .bat on Windows (Desktop.getDesktop() doesn't)
+                Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "http://localhost:8080"});
+            } else if (os.contains("mac")) {
+                Runtime.getRuntime().exec(new String[]{"open", "http://localhost:8080"});
+            } else {
+                Runtime.getRuntime().exec(new String[]{"xdg-open", "http://localhost:8080"});
             }
         } catch (Exception ignored) {}
     }

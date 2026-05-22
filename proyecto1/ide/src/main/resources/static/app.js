@@ -114,24 +114,6 @@ require(['vs/editor/editor.main'], function () {
         }
     });
 
-    // Autocompletado AvengerScript
-    monaco.languages.registerCompletionItemProvider('avenger', {
-        provideCompletionItems: function (model, position) {
-            const kws = [
-                'stark','banner','rogers','thor','bob',
-                'vision','wanda','loki','fury',
-                'gamora','nebula','recruit','assemble','return','jarvis',
-                'TRUE','FALSE'
-            ];
-            const suggestions = kws.map(k => ({
-                label: k,
-                kind: monaco.languages.CompletionItemKind.Keyword,
-                insertText: k,
-            }));
-            return { suggestions };
-        }
-    });
-
     // Tema personalizado Avengers
     monaco.editor.defineTheme('avengers-dark', {
         base: 'vs-dark',
@@ -155,14 +137,20 @@ require(['vs/editor/editor.main'], function () {
             { token: 'identifier',       foreground: 'abb2bf' },
         ],
         colors: {
-            'editor.background':                  '#0d0d1a',
-            'editor.foreground':                  '#abb2bf',
-            'editorLineNumber.foreground':        '#3a3a5c',
-            'editorLineNumber.activeForeground':  '#888',
-            'editor.selectionBackground':         '#264f7844',
-            'editor.lineHighlightBackground':     '#16213e',
-            'editorCursor.foreground':            '#ffd700',
-            'editorIndentGuide.background':       '#252545',
+            'editor.background':                       '#0d0d1a',
+            'editor.foreground':                       '#abb2bf',
+            'editorLineNumber.foreground':             '#3a3a5c',
+            'editorLineNumber.activeForeground':       '#888',
+            'editor.selectionBackground':              '#264f7844',
+            'editor.lineHighlightBackground':          '#16213e',
+            'editorCursor.foreground':                 '#ffd700',
+            'editorIndentGuide.background':            '#252545',
+            'editorSuggestWidget.background':          '#181c28',
+            'editorSuggestWidget.border':              '#263650',
+            'editorSuggestWidget.foreground':          '#dce8f0',
+            'editorSuggestWidget.selectedBackground':  '#2e74c0',
+            'editorSuggestWidget.selectedForeground':  '#ffffff',
+            'editorSuggestWidget.highlightForeground': '#f0a500',
         }
     });
 
@@ -180,7 +168,8 @@ require(['vs/editor/editor.main'], function () {
         insertSpaces: true,
         lineNumbers: 'on',
         renderLineHighlight: 'all',
-        suggestOnTriggerCharacters: true,
+        quickSuggestions: false,
+        suggestOnTriggerCharacters: false,
     });
 
     // Editor derecho (Java generado — solo lectura)
@@ -206,7 +195,9 @@ require(['vs/editor/editor.main'], function () {
         monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyB,
         () => doCompile()
     );
+
 });
+
 
 // ─── Ejemplos ────────────────────────────────────────────────────────────────
 document.getElementById('exampleSelect').addEventListener('change', function () {
