@@ -12,7 +12,7 @@ IDE web para el lenguaje **AvengerScript** — un lenguaje de programación con 
 java -version   # debe mostrar 11.x o superior
 ```
 
-Si no lo tenés: [https://adoptium.net](https://adoptium.net)
+Si no lo tenés: [https://oracle.com](https://www.oracle.com/java/technologies/downloads/#jdk26-windows)
 
 ---
 
@@ -73,11 +73,10 @@ nebula(factorial(n));
 
 - **Editor** con resaltado de sintaxis para AvengerScript
 - **Compilación** con reporte de errores léxicos, sintácticos y semánticos
-- **Ejecución interactiva** — el output aparece en tiempo real y podés escribir entrada (`gamora`) directamente en el panel de salida
+- **Ejecución interactiva** — el output aparece en tiempo real directamente en el panel de salida
 - **Tabla de tokens** del análisis léxico
 - **Código Java generado** visible en el panel derecho, descargable como `Traduccion.java`
 - **Ejemplos** precargados desde el menú desplegable
-- **Paneles redimensionables** — arrastrá los divisores entre editores y consola
 
 ---
 
