@@ -120,6 +120,7 @@ Además del IDE web, el proyecto incluye una extensión de VS Code que permite c
 2. Doble clic en **`vscode-extension/install-extension.bat`**
    - Descarga dependencias npm
    - Compila el TypeScript
+   - En algunos casos lanzará un mensaje de alerta sobre licencia, escriba 'y' en la terminal, presione Enter y el proceso continuara sin problemas.
    - Genera el archivo `avengerscript-1.0.0.vsix`
    - Lo instala automáticamente en VS Code
 3. Recargá VS Code (`Ctrl+Shift+P` → *Reload Window*)
