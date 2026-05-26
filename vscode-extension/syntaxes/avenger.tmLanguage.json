@@ -1,0 +1,109 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "AvengerScript",
+  "scopeName": "source.avengerscript",
+  "fileTypes": ["avng"],
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#string" },
+    { "include": "#constant-boolean" },
+    { "include": "#keyword-type" },
+    { "include": "#keyword-control" },
+    { "include": "#keyword-io" },
+    { "include": "#keyword-module" },
+    { "include": "#keyword-jarvis" },
+    { "include": "#keyword-return" },
+    { "include": "#number" },
+    { "include": "#operator-compare" },
+    { "include": "#operator-arith" },
+    { "include": "#punctuation" },
+    { "include": "#function-call" },
+    { "include": "#identifier" }
+  ],
+  "repository": {
+
+    "comment": {
+      "name": "comment.line.double-slash.avengerscript",
+      "match": "//.*$"
+    },
+
+    "string": {
+      "name": "string.quoted.double.avengerscript",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.avengerscript", "match": "\\\\." }
+      ]
+    },
+
+    "constant-boolean": {
+      "name": "constant.language.boolean.avengerscript",
+      "match": "\\b(TRUE|FALSE)\\b"
+    },
+
+    "keyword-type": {
+      "name": "storage.type.avengerscript",
+      "match": "\\b(stark|banner|rogers|thor|bob)\\b"
+    },
+
+    "keyword-control": {
+      "name": "keyword.control.avengerscript",
+      "match": "\\b(vision|wanda|loki|fury)\\b"
+    },
+
+    "keyword-io": {
+      "name": "support.function.builtin.avengerscript",
+      "match": "\\b(gamora|nebula)\\b"
+    },
+
+    "keyword-module": {
+      "name": "keyword.other.module.avengerscript",
+      "match": "\\b(recruit|assemble)\\b"
+    },
+
+    "keyword-jarvis": {
+      "name": "keyword.operator.assignment.avengerscript",
+      "match": "\\bjarvis\\b"
+    },
+
+    "keyword-return": {
+      "name": "keyword.control.return.avengerscript",
+      "match": "\\breturn\\b"
+    },
+
+    "number": {
+      "name": "constant.numeric.avengerscript",
+      "match": "\\b\\d+(\\.\\d+)?\\b"
+    },
+
+    "operator-compare": {
+      "name": "keyword.operator.comparison.avengerscript",
+      "match": "(==|!=|<=|>=|<|>)"
+    },
+
+    "operator-arith": {
+      "name": "keyword.operator.arithmetic.avengerscript",
+      "match": "(\\+|\\-|\\*|\\/)"
+    },
+
+    "punctuation": {
+      "patterns": [
+        { "name": "punctuation.terminator.statement.avengerscript", "match": ";" },
+        { "name": "punctuation.separator.comma.avengerscript",      "match": "," },
+        { "name": "punctuation.section.block.begin.avengerscript",  "match": "\\{" },
+        { "name": "punctuation.section.block.end.avengerscript",    "match": "\\}" },
+        { "name": "meta.brace.round.avengerscript",                 "match": "[()]" }
+      ]
+    },
+
+    "function-call": {
+      "name": "entity.name.function.avengerscript",
+      "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)(?=\\s*\\()"
+    },
+
+    "identifier": {
+      "name": "variable.other.avengerscript",
+      "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+    }
+  }
+}

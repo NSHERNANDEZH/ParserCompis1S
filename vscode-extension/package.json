@@ -1,0 +1,128 @@
+{
+  "name": "avengerscript",
+  "displayName": "AvengerScript",
+  "description": "Soporte para el lenguaje AvengerScript — sintaxis, compilación y ejecución desde VS Code",
+  "version": "1.0.0",
+  "publisher": "url",
+  "icon": "images/icon.png",
+  "engines": { "vscode": "^1.75.0" },
+  "categories": ["Programming Languages", "Snippets"],
+  "keywords": ["avengerscript", "avenger", "marvel", "compilador"],
+  "repository": { "type": "git", "url": "https://github.com/url/ParserCompis1S" },
+
+  "activationEvents": ["onLanguage:avengerscript"],
+
+  "main": "./out/extension.js",
+
+  "contributes": {
+
+    "languages": [
+      {
+        "id": "avengerscript",
+        "aliases": ["AvengerScript", "avenger"],
+        "extensions": [".avng"],
+        "configuration": "./language-configuration.json",
+        "icon": { "light": "./images/icon.png", "dark": "./images/icon.png" }
+      }
+    ],
+
+    "grammars": [
+      {
+        "language": "avengerscript",
+        "scopeName": "source.avengerscript",
+        "path": "./syntaxes/avenger.tmLanguage.json"
+      }
+    ],
+
+    "snippets": [
+      {
+        "language": "avengerscript",
+        "path": "./snippets/avenger.json"
+      }
+    ],
+
+    "commands": [
+      {
+        "command": "avengerscript.compile",
+        "title": "AvengerScript: Compilar",
+        "icon": "$(play)"
+      },
+      {
+        "command": "avengerscript.run",
+        "title": "AvengerScript: Ejecutar",
+        "icon": "$(run-all)"
+      },
+      {
+        "command": "avengerscript.showJava",
+        "title": "AvengerScript: Ver código Java generado"
+      },
+      {
+        "command": "avengerscript.startServer",
+        "title": "AvengerScript: Iniciar servidor IDE"
+      }
+    ],
+
+    "keybindings": [
+      {
+        "command": "avengerscript.compile",
+        "key": "ctrl+shift+b",
+        "when": "editorLangId == avengerscript"
+      },
+      {
+        "command": "avengerscript.run",
+        "key": "f5",
+        "when": "editorLangId == avengerscript"
+      }
+    ],
+
+    "menus": {
+      "editor/title": [
+        {
+          "command": "avengerscript.compile",
+          "when": "editorLangId == avengerscript",
+          "group": "navigation"
+        },
+        {
+          "command": "avengerscript.run",
+          "when": "editorLangId == avengerscript",
+          "group": "navigation"
+        }
+      ]
+    },
+
+    "configuration": {
+      "title": "AvengerScript",
+      "properties": {
+        "avengerscript.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:8080",
+          "description": "URL del servidor AvengerScript IDE (compilador backend)"
+        },
+        "avengerscript.autoCompileOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Compilar automáticamente al guardar para mostrar errores"
+        },
+        "avengerscript.showTokensOnCompile": {
+          "type": "boolean",
+          "default": false,
+          "description": "Mostrar tabla de tokens en el Output al compilar"
+        }
+      }
+    }
+  },
+
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package --no-dependencies --allow-missing-repository"
+  },
+
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "^18.0.0",
+    "@vscode/vsce": "^2.22.0",
+    "typescript": "^5.2.0"
+  }
+}

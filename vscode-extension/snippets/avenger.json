@@ -1,0 +1,104 @@
+{
+  "Variable entera": {
+    "prefix": "stark",
+    "body": ["stark ${1:nombre} jarvis ${2:0};"],
+    "description": "Declarar variable entera (int)"
+  },
+  "Variable decimal": {
+    "prefix": "banner",
+    "body": ["banner ${1:nombre} jarvis ${2:0.0};"],
+    "description": "Declarar variable decimal (double)"
+  },
+  "Variable texto": {
+    "prefix": "rogers",
+    "body": ["rogers ${1:nombre} jarvis \"${2:texto}\";"],
+    "description": "Declarar variable de texto (String)"
+  },
+  "Variable booleana": {
+    "prefix": "thor",
+    "body": ["thor ${1:nombre} jarvis ${2|TRUE,FALSE|};"],
+    "description": "Declarar variable booleana"
+  },
+  "Imprimir": {
+    "prefix": "nebula",
+    "body": ["nebula(${1:valor});"],
+    "description": "Imprimir en pantalla"
+  },
+  "Leer entrada": {
+    "prefix": "gamora",
+    "body": ["gamora(${1:variable});"],
+    "description": "Leer entrada del usuario"
+  },
+  "If": {
+    "prefix": "vision",
+    "body": [
+      "vision (${1:condicion}) {",
+      "\t${2:// código}",
+      "}"
+    ],
+    "description": "Bloque if"
+  },
+  "If-Else": {
+    "prefix": "visionwanda",
+    "body": [
+      "vision (${1:condicion}) {",
+      "\t${2:// si verdadero}",
+      "} wanda {",
+      "\t${3:// si falso}",
+      "}"
+    ],
+    "description": "Bloque if-else"
+  },
+  "While": {
+    "prefix": "loki",
+    "body": [
+      "loki (${1:condicion}) {",
+      "\t${2:// cuerpo}",
+      "}"
+    ],
+    "description": "Ciclo while"
+  },
+  "For": {
+    "prefix": "fury",
+    "body": [
+      "fury (stark ${1:i} jarvis ${2:0}; ${1:i} < ${3:n}; ${1:i} jarvis ${1:i} + 1) {",
+      "\t${4:// cuerpo}",
+      "}"
+    ],
+    "description": "Ciclo for"
+  },
+  "Función con retorno": {
+    "prefix": "funcion",
+    "body": [
+      "${1|stark,banner,rogers,thor|} ${2:nombre}(${3:params}) {",
+      "\t${4:// cuerpo}",
+      "\treturn ${5:valor};",
+      "}"
+    ],
+    "description": "Declarar función con valor de retorno"
+  },
+  "Función void": {
+    "prefix": "bob",
+    "body": [
+      "bob ${1:nombre}(${2:params}) {",
+      "\t${3:// cuerpo}",
+      "}"
+    ],
+    "description": "Declarar función void (sin retorno)"
+  },
+  "Hola Mundo": {
+    "prefix": "hola",
+    "body": ["nebula(\"¡Hola, Mundo!\");"],
+    "description": "Hola Mundo en AvengerScript"
+  },
+  "Importar módulo Java": {
+    "prefix": "recruit",
+    "body": ["recruit \"${1:java.util.*}\";"],
+    "description": "Importar paquete Java"
+  },
+  "Incluir archivo AvengerScript": {
+    "prefix": "assemble",
+    "body": ["assemble \"${1:modulo.avng}\";"],
+    "description": "Incluir archivo AvengerScript externo"
+  }
+}

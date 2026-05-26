@@ -3,6 +3,11 @@ target/
 out/
 output/
 
+# VS Code extension
+vscode-extension/node_modules/
+vscode-extension/out/
+vscode-extension/*.vsix
+
 # IntelliJ IDEA
 *.iml
 .idea/

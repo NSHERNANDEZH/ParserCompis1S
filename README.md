@@ -97,7 +97,56 @@ ParserCompis1S/
 │   │           └── static/  → Frontend: index.html, app.js, style.css
 │   ├── docs/                → Documentación técnica (PDF)
 │   └── testing/             → Archivos de prueba (.txt, .avng)
+├── vscode-extension/        → Extensión de VS Code
+│   ├── install-extension.bat → Construye e instala la extensión
+│   ├── src/extension.ts     → Lógica principal (compilar, ejecutar, diagnósticos)
+│   ├── syntaxes/            → Gramática TextMate para syntax highlighting
+│   ├── snippets/            → Snippets de código
+│   └── images/              → Ícono de la extensión
 └── lab01/                   → Laboratorio 01 (parser de expresiones)
+```
+
+---
+
+## Extensión de VS Code
+
+Además del IDE web, el proyecto incluye una extensión de VS Code que permite compilar y ejecutar archivos `.avng` directamente desde el editor, usando el mismo servidor como backend.
+
+### Instalación (una sola vez)
+
+**Requisito previo:** tener [Node.js](https://nodejs.org) instalado.
+
+1. Iniciá el servidor con **`run-ide.bat`**
+2. Doble clic en **`vscode-extension/install-extension.bat`**
+   - Descarga dependencias npm
+   - Compila el TypeScript
+   - Genera el archivo `avengerscript-1.0.0.vsix`
+   - Lo instala automáticamente en VS Code
+3. Recargá VS Code (`Ctrl+Shift+P` → *Reload Window*)
+
+### Funcionalidades
+
+| Función | Cómo activarla |
+|---|---|
+| Syntax highlighting en `.avng` | Automático al abrir el archivo |
+| Compilar y ver errores subrayados | `Ctrl+Shift+B` o al guardar |
+| Ejecutar con entrada estándar | `F5` |
+| Ver el código Java generado | `Ctrl+Shift+P` → *AvengerScript: Ver código Java generado* |
+| Iniciar el servidor IDE desde VS Code | `Ctrl+Shift+P` → *AvengerScript: Iniciar servidor IDE* |
+| Snippets (`stark`, `nebula`, `fury`…) | Tipear el prefix y `Tab` |
+
+> El IDE web en `localhost:8080` sigue funcionando con normalidad. La extensión es un cliente que le habla al mismo servidor.
+
+### Estructura de la extensión
+
+```
+vscode-extension/
+├── install-extension.bat        → Construye e instala la extensión
+├── package.json                 → Manifiesto (comandos, keybindings, config)
+├── src/extension.ts             → Lógica principal
+├── syntaxes/avenger.tmLanguage.json  → Syntax highlighting
+├── snippets/avenger.json        → 14 snippets de código
+└── language-configuration.json → Brackets, comentarios
 ```
 
 ---
